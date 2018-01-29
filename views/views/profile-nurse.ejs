@@ -1,0 +1,60 @@
+<header id="header" data-current-skin={{mactrl.currentSkin}} data-ng-include="'template/header.ejs'" data-ng-controller="headerCtrl as hctrl"></header>
+<section id="main">
+	<aside id="sidebar" data-ng-include="'template/sidebar-left.ejs'" data-ng-class="{ 'toggled': mactrl.sidebarToggle.left === true }"></aside>
+	<section id="content" >
+<div class="card" data-ng-controller="userController">
+	<div class="card" data-ng-controller="usersController">
+    <script type="text/ng-template" id="myModalContent.html">
+        <div class="modal-header">
+            <h3 class="modal-title" id="modal-title">Are you sure?</h3>
+        </div>
+        <div class="modal-body" id="modal-body">
+            Are you sure you want to proceed?
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-success" type="button" ng-click="ok()">OK</button>
+            <button class="btn btn-danger" type="button" ng-click="cancel()">Annuler</button>
+        </div>
+    </script> 
+	<div class="card-header">
+		<button class="btn btn-primary" data-ui-sref="update-nurse">Edit profile</button>
+		<ul class="actions article-actions m-top-5">
+			<li>
+				<button class="btn btn-default" ng-click="deleteUser(user.id)">
+	                <i class="zmdi zmdi-delete"></i>
+	               <span> Delete profile</span>
+	            </button>
+			</li>
+		</ul>
+	</div>
+	<div class="card-body" id="profile-main" ng-hide='hideSpinner' us-spinner spinner-key="spinner-1" spinner-start-active="true" spinner-theme="bigBlue">
+	           	<div class="lv-item media" >
+	         	</div>
+	</div>
+	<div class="card-body" id="profile-main">
+		<div class="pm-overview">
+			 <div class="pmo-pic">
+	            <div class="p-relative">
+	                <a href="">
+	                    <img class="img-responsive" src="{{user.profile_picture}}" alt="">
+	                </a>
+	            </div>
+	        </div>
+		</div>
+		 <div class="pm-body clearfix">
+        	<h2>{{user.firstName}} {{user.lastName}}<span>Infirmier</span></h2>
+        	<table class="table table-user-info">
+        		<tr>
+        			<td> <span>Phone</span> </td>
+        			<td> {{user.phoneNumber}} </td>
+        		</tr>
+        		<tr>
+        			<td> <span>Email</span> </td>
+        			<td> {{user.email}} </td>
+        		</tr>
+        	</table>
+   		</div>
+	</div>
+</div>
+	</section>
+</section>

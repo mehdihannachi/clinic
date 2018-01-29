@@ -1,0 +1,65 @@
+.dialog {
+	width: 700px;
+	max-width: 100%;
+	.card {
+		margin-bottom: 0;	
+	}
+
+	.btn {
+		width: 100px;
+	}
+}
+
+.appoinment-dialog {
+	width: 900px;
+	min-height: 500px;
+
+	.card-body {
+		padding: 0 20px;
+		@media (min-width: 992px) {
+			padding: 0 20px 0 0;
+		}
+	}
+
+	.title {
+	    color: rgb(61, 61, 61);
+	    display: inline-block;
+	    margin: 0;
+	    font-size: 14px;
+	    font-weight: normal;
+	    padding: 0 6px;
+	    line-height: 33px;
+	    vertical-align: middle;
+	    padding: 17px 0 17px 0;
+	}
+
+	.col-md-4 {
+		.listview {
+			max-height: 517px;
+			.lv-item {
+				border-bottom: 1px solid rgb(200, 200, 200);
+			}
+
+			@media (min-width: 992px) {
+				height: 517px;
+				border-right: 1px solid rgb(170, 170, 170);
+			}
+		}
+	}
+
+	.close {
+		position: absolute;
+		top: 5px;
+		right: 5px;
+		font-size: 12px; 
+	}
+
+	.side-title {
+		border-bottom: 1px solid rgb(170, 170, 170);
+		&:hover {
+			background: none !important;
+			cursor: default;
+		}
+	}
+	
+}

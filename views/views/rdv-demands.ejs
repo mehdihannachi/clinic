@@ -1,0 +1,309 @@
+<header id="header" data-current-skin={{mactrl.currentSkin}} data-ng-include="'template/header.ejs'" data-ng-controller="headerCtrl as hctrl"></header>
+<section id="main">
+	<aside id="sidebar" data-ng-include="'template/sidebar-left.ejs'" data-ng-class="{ 'toggled': mactrl.sidebarToggle.left === true }"></aside>
+	<section id="content" >
+<div class="card" data-ng-app="materialAdmin" data-ng-controller='rdvDemandsController' data-ng-cloak>
+<script type="text/ng-template" id="myModalContent.html">
+        <div class="modal-header">
+            <h3 class="modal-title" id="modal-title">Êtes-vous sûr?</h3>
+        </div>
+        <div class="modal-body" id="modal-body">
+            Êtes-vous sûr de vouloir continuer?
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-success" type="button" ng-click="ok()">OK</button>
+            <button class="btn btn-danger" type="button" ng-click="cancel()">Annuler</button>
+        </div>
+    </script>  
+    <script type="text/ng-template" id="modalRdvContent.html">
+        <div class="modal-header">
+            <button type="button" class="close" datadismiss="modal" ng-click="cancel()">&times;</button>
+            <h3 class="modal-title" id="modal-title">Quel type de rendez-vous vous voulez avoir?</h3>
+        </div>
+        <div class="modal-body" id="modal-body">
+            <div class="footer-wrap modern">
+                <div class="alert alert-danger fade in" ng-show="error == true">
+                    {{errorMSG}}
+                </div>
+                <div class="contact-us">
+                    <form id="contact-us" name="rdvForm" novalidate ng-class="{true:'submitted'}[submitted]" class="medic-form-control m-bottom-40 drawer-form form-group">
+                        <div class="row">
+                            <table>
+                                <tr>
+                                    <td><input type="radio" ng-model="etat" value="2" id="accept" class="medic-input-radio" required ng-required="true"></td>
+                                    <td>
+                                        <label class="drawer-element-label" for="accept">Accepter Rendez-vous</label></td>
+
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <input type="radio" ng-model="etat" value="3" id="refuse" class="medic-input-radio" required ng-required="true"></td>
+                                    <td>
+                                        <label class="drawer-element-label" for="refuse">Refuser Rendez-vous</label></td>
+
+                                </tr>
+                            </table>
+                            <button class="btn btn-success" type="button" ng-click="ok(rdvForm.$valid)">Valider</button>
+                            <button class="btn btn-danger" type="button"  ng-click="cancel()">Annuler</button>
+
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </script>
+    <div class="listview lv-bordered lv-lg" >
+        <div class="lv-header-alt clearfix">
+            <h2 class="lvh-label hidden-xs">{{totalItems}} Demandes de Rendez-vous</h2>
+            
+            <div class="dropdown" uib-dropdown="">
+                <a href="" uib-dropdown-toggle="" aria-expanded="false" class="dropdown-toggle" aria-haspopup="true">
+                    {{ShowOption}} <i class="zmdi zmdi-chevron-down zmdi-hc-fw"></i>
+                </a>
+                <ul class="dropdown-menu dropdown-menu-right">
+                    <li>
+                        <a href ng-click="showAll()">Afficher tout</a>
+                        <a href ng-click="showOn_hold()">Demandes en attente</a>
+                        <a href ng-click="showAccepted()">Demandes acceptées</a>
+                        <a href ng-click="showRefused()">Demandes refusées</a>
+                    </li>
+                </ul>
+            </div>
+            
+            <!-- Bar search by Mahdi-->
+            <!--<input type="text" placeholder="Start typing..." class="lvhs-input" ng-model="search.title">-->
+            
+            <div class="lvh-search" ng-hide="!mactrl.listviewSearchStat">
+                <input type="text" placeholder="Start typing..." class="lvhs-input" ng-model="search.title">
+                <i class="lvh-search-close" ng-click="mactrl.listviewSearchStat = false; search.title ='' ">&times;</i>
+            </div>
+            
+            
+            <ul class="lv-actions actions" ng-init="articles">
+                <!--<li><button data-ui-sref="new-article" class="btn btn-primary btn-vawe">Add new article</button></li>-->
+                <li>
+                    <a href="" data-ng-click="mactrl.listviewSearchStat = true">
+                        <i class="zmdi zmdi-search"></i>
+                    </a>
+                </li>
+                <li class="dropdown" uib-dropdown>
+                    <a href="" uib-dropdown-toggle aria-expanded="true">
+                        <i class="zmdi zmdi-more-vert"></i>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-right">
+                        <li>
+                            <a href ng-click="ActionOnSelected(1,selectedRdv)">Transférer vers Brouillon</a>
+                            <a href ng-click="ActionOnSelected(2,selectedRdv)">Supprimer la sélection</a>
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+        <div class="lv-body" ng-hide='hideSpinner' us-spinner spinner-key="spinner-1" spinner-start-active="true" spinner-theme="bigBlue">
+            <div class="lv-item media" >
+            </div>
+            </div>
+        <div class="lv-body" ng-show="error == true" >
+			
+            <div class="lv-item media">
+                <div class="alert alert-danger fade in" >{{errorMSG}}</div>
+            </div>
+        </div>
+                
+         <div class="lv-body" ng-show="allrD == 1">
+			<div dir-paginate="rdvDemand in rdvDemands | itemsPerPage: 5 | filter:search | orderBy: 'created_at'" pagination-id="all">
+
+            <div class="lv-item media fades" ng-cloak  >
+                <div class="checkbox pull-left">
+                    <label>
+                        <input type="checkbox" ng-model="selectedRdv[rdvDemand._id]" >
+                        <i class="input-helper"></i>
+                    </label>
+                </div>
+                <div class="media-body" >
+                    <div class="lv-title">{{rdvDemand.user.firstName}} {{rdvDemand.user.lastName}} 
+                    <div ng-show="rdvDemand.etat == 1">
+                    <span class="fa fa-hourglass-end " style="color:orange;" ></span>
+                    <span class="glyphicon glyphicon-ok icons-disabled" style="color:green;" ></span>
+                    <span class="glyphicon glyphicon-remove icons-disabled" style="color:red;"></span>
+                    </div>
+                    <div ng-show="rdvDemand.etat == 2">
+                    <span class="fa fa-hourglass-end icons-disabled" style="color:orange;" ></span>
+                    <span class="glyphicon glyphicon-ok" style="color:green;" ></span>
+                    <span class="glyphicon glyphicon-remove icons-disabled" style="color:red;"></span>
+                    </div>
+                    <div ng-show="rdvDemand.etat == 3">
+                    <span class="fa fa-hourglass-end icons-disabled" style="color:orange;" ></span>
+                    <span class="glyphicon glyphicon-ok icons-disabled" style="color:green;" ></span>
+                    <span class="glyphicon glyphicon-remove" style="color:red;"></span>
+                    </div>
+                    </div>
+                    <div>Type du rendez-vous: {{rdvDemand.type}}</div>
+                    <time title="{{ rdvDemand.date| amDateFormat: 'dddd, MMMM Do YYYY' }}"> Rendez-vous pour le: {{ rdvDemand.date | amDateFormat: 'dddd, MMMM Do YYYY'  }}</time>
+                    <div>Raison de la consultation: {{rdvDemand.message}}</div>
+                    <ul class="lv-actions actions">
+                        <li>
+                            <a href="" ng-click="deleteModal(rdvDemand._id)">
+                                <i class="zmdi zmdi-delete"></i>
+                            </a>
+                        </li>
+                        
+                    </ul>
+                </div>
+            </div>
+            
+            
+        </div>
+        </div>
+         <div class="lv-body" ng-show="acceptedrD == 1">
+			<div dir-paginate="rdvDemand in accepted | itemsPerPage: 5 | filter:search | orderBy: 'created_at'" pagination-id="accepted">
+
+            <div class="lv-item media fades" ng-cloak  >
+                <div class="checkbox pull-left">
+                    <label>
+                        <input type="checkbox" ng-model="selectedRdv[rdvDemand._id]" >
+                        <i class="input-helper"></i>
+                    </label>
+                </div>
+                <div class="media-body" >
+                    <div class="lv-title">{{rdvDemand.user.firstName}} {{rdvDemand.user.lastName}} 
+                    <div ng-show="rdvDemand.etat == 1">
+                    <span class="fa fa-hourglass-end " style="color:orange;" ></span>
+                    <span class="glyphicon glyphicon-ok icons-disabled" style="color:green;" ></span>
+                    <span class="glyphicon glyphicon-remove icons-disabled" style="color:red;"></span>
+                    </div>
+                    <div ng-show="rdvDemand.etat == 2">
+                    <span class="fa fa-hourglass-end icons-disabled" style="color:orange;" ></span>
+                    <span class="glyphicon glyphicon-ok" style="color:green;" ></span>
+                    <span class="glyphicon glyphicon-remove icons-disabled" style="color:red;"></span>
+                    </div>
+                    <div ng-show="rdvDemand.etat == 3">
+                    <span class="fa fa-hourglass-end icons-disabled" style="color:orange;" ></span>
+                    <span class="glyphicon glyphicon-ok icons-disabled" style="color:green;" ></span>
+                    <span class="glyphicon glyphicon-remove" style="color:red;"></span>
+                    </div>
+                    </div>
+                    <div>Type du rendez-vous: {{rdvDemand.type}}</div>
+                    <time title="{{ rdvDemand.date| amDateFormat: 'dddd, MMMM Do YYYY, h:mm a' }}"> Rendez-vous pour le: {{ rdvDemand.date | amDateFormat: 'dddd, MMMM Do YYYY, h:mm a'  }}</time>
+                    <div>Raison de la consultation: {{rdvDemand.message}}</div>
+                    <ul class="lv-actions actions">
+                        <li>
+                            <a href="" ng-click="deleteModal(rdvDemand._id)">
+                                <i class="zmdi zmdi-delete"></i>
+                            </a>
+                        </li>
+                        
+                    </ul>
+                </div>
+            </div>
+            
+            
+        </div>
+        </div>
+         <div class="lv-body" ng-show="refusedrD == 1" >
+			<div dir-paginate="rdvDemand in refused | itemsPerPage: 5 | filter:search | orderBy: 'created_at'" pagination-id="refusedrD">
+
+            <div class="lv-item media fades" ng-cloak  >
+                <div class="checkbox pull-left">
+                    <label>
+                        <input type="checkbox" ng-model="selectedRdv[rdvDemand._id]" >
+                        <i class="input-helper"></i>
+                    </label>
+                </div>
+                <div class="media-body" >
+                    <div class="lv-title">{{rdvDemand.user.firstName}} {{rdvDemand.user.lastName}} 
+                    <div ng-show="rdvDemand.etat == 1">
+                    <span class="fa fa-hourglass-end " style="color:orange;" ></span>
+                    <span class="glyphicon glyphicon-ok icons-disabled" style="color:green;" ></span>
+                    <span class="glyphicon glyphicon-remove icons-disabled" style="color:red;"></span>
+                    </div>
+                    <div ng-show="rdvDemand.etat == 2">
+                    <span class="fa fa-hourglass-end icons-disabled" style="color:orange;" ></span>
+                    <span class="glyphicon glyphicon-ok" style="color:green;" ></span>
+                    <span class="glyphicon glyphicon-remove icons-disabled" style="color:red;"></span>
+                    </div>
+                    <div ng-show="rdvDemand.etat == 3">
+                    <span class="fa fa-hourglass-end icons-disabled" style="color:orange;" ></span>
+                    <span class="glyphicon glyphicon-ok icons-disabled" style="color:green;" ></span>
+                    <span class="glyphicon glyphicon-remove" style="color:red;"></span>
+                    </div>
+                    </div>
+                    <div>Type du rendez-vous: {{rdvDemand.type}}</div>
+                    <time title="{{ rdvDemand.date| amDateFormat: 'dddd, MMMM Do YYYY, h:mm a' }}"> Rendez-vous pour le: {{ rdvDemand.date | amDateFormat: 'dddd, MMMM Do YYYY, h:mm a'  }}</time>
+                    <div>Raison de la consultation: {{rdvDemand.message}}</div>
+                    <ul class="lv-actions actions">
+                        <li>
+                            <a href="" ng-click="deleteModal(rdvDemand._id)">
+                                <i class="zmdi zmdi-delete"></i>
+                            </a>
+                        </li>
+                        
+                    </ul>
+                </div>
+            </div>
+            
+            
+        </div>
+        </div>
+         <div class="lv-body" ng-show="on_holdrD == 1">
+			<div dir-paginate="rdvDemand in on_hold | itemsPerPage: 5 | filter:search | orderBy: 'created_at'" pagination-id="on_hold">
+
+            <div class="lv-item media fades" ng-cloak  >
+                <div class="checkbox pull-left">
+                    <label>
+                        <input type="checkbox" ng-model="selectedRdv[rdvDemand._id]" >
+                        <i class="input-helper"></i>
+                    </label>
+                </div>
+                <div class="media-body" >
+                    <div class="lv-title">{{rdvDemand.user.firstName}} {{rdvDemand.user.lastName}} 
+                    <div ng-show="rdvDemand.etat == 1">
+                    <span class="fa fa-hourglass-end " style="color:orange;" ></span>
+                    <span class="glyphicon glyphicon-ok icons-disabled" style="color:green;" ></span>
+                    <span class="glyphicon glyphicon-remove icons-disabled" style="color:red;"></span>
+                    </div>
+                    <div ng-show="rdvDemand.etat == 2">
+                    <span class="fa fa-hourglass-end icons-disabled" style="color:orange;" ></span>
+                    <span class="glyphicon glyphicon-ok" style="color:green;" ></span>
+                    <span class="glyphicon glyphicon-remove icons-disabled" style="color:red;"></span>
+                    </div>
+                    <div ng-show="rdvDemand.etat == 3">
+                    <span class="fa fa-hourglass-end icons-disabled" style="color:orange;" ></span>
+                    <span class="glyphicon glyphicon-ok icons-disabled" style="color:green;" ></span>
+                    <span class="glyphicon glyphicon-remove" style="color:red;"></span>
+                    </div>
+                    </div>
+                    <div>Type du rendez-vous: {{rdvDemand.type}}</div>
+                    <time title="{{ rdvDemand.date| amDateFormat: 'dddd, MMMM Do YYYY, h:mm a' }}"> Rendez-vous pour le: {{ rdvDemand.date | amDateFormat: 'dddd, MMMM Do YYYY, h:mm a'  }}</time>
+                    <div>Raison de la consultation: {{rdvDemand.message}}</div>
+                    <ul class="lv-actions actions">
+                        <li>
+                            <a href="" ng-click="deleteModal(rdvDemand._id)">
+                                <i class="zmdi zmdi-delete"></i>
+                            </a>
+                        </li>
+                        
+                    </ul>
+                </div>
+            </div>
+            
+            
+        </div>
+        </div>
+    </div>
+    
+    <div class="lv-pagination"  ng-show="allrD == 1">
+      <dir-pagination-controls pagination-id="all"></dir-pagination-controls>
+    </div>
+    <div class="lv-pagination"  ng-show="acceptedrD == 1">
+      <dir-pagination-controls pagination-id="accepted"></dir-pagination-controls>
+    </div>
+    <div class="lv-pagination" ng-show="refusedrD == 1">
+      <dir-pagination-controls pagination-id="refused"></dir-pagination-controls>
+    </div>
+    <div class="lv-pagination"  ng-show="on_holdrD == 1">
+      <dir-pagination-controls pagination-id="on_hold"></dir-pagination-controls>
+    </div>
+</div>
+	</section>
+</section>

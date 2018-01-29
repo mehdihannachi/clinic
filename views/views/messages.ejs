@@ -1,0 +1,97 @@
+<header id="header" data-current-skin={{mactrl.currentSkin}} data-ng-include="'template/header.ejs'" data-ng-controller="headerCtrl as hctrl"></header>
+<section id="main">
+    <aside id="sidebar" data-ng-include="'template/sidebar-left.ejs'" data-ng-class="{ 'toggled': mactrl.sidebarToggle.left === true }"></aside>
+    <section id="content" data-ng-controller="chatController">
+        <script type="text/ng-template" id="myModalContent.html">
+            <div class="modal-header">
+                <h3 class="modal-title" id="modal-title">Are you sure?</h3>
+            </div>
+            <div class="modal-body" id="modal-body">
+                Are you sure you want to proceed?
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-danger" type="button" ng-click="ok()">OK</button>
+                <button class="btn btn-success" type="button" ng-click="cancel()">Annuler</button>
+            </div>
+        </script>
+        <div class="container">
+            <div class="card">
+                <div class="listview lv-bordered lv-lg">
+                    <div class="lv-header-alt clearfix">
+                        <h2 class="lvh-label hidden-xs">{{discussions.length}} Conversation</h2>
+                        <buton class="btn btn-default" data-ui-sref="newChat">+ Start new</buton>
+                        <div class="lvh-search" ng-hide="!mactrl.listviewSearchStat">
+                            <input type="text" placeholder="Start typing..." class="lvhs-input" ng-model="search">
+                            <i class="lvh-search-close" ng-click="mactrl.listviewSearchStat = false; search ='' ">&times;</i>
+                        </div>
+                        <ul class="lv-actions actions">
+                            <li>
+                                <a href="" data-ng-click="mactrl.listviewSearchStat = true">
+                                    <i class="zmdi zmdi-search"></i>
+                                </a>
+                            </li>
+                            <li class="dropdown" uib-dropdown>
+                                <a href="" uib-dropdown-toggle aria-expanded="true">
+                                    <i class="zmdi zmdi-more-vert"></i>
+                                </a>
+                                <ul class="dropdown-menu dropdown-menu-right">
+                                    <li>
+                                        <a ng-click="deleteSelected()">Supprimer la sélection</a>
+                                    </li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="lv-body" ng-hide='hideSpinner'>
+                        <div class="lv-item media fades">
+                            <div class="checkbox pull-left"></div>
+                            <div class="media-body" us-spinner spinner-key="spinner-1" spinner-start-active="true" spinner-theme="bigBlue"></div>
+                        </div>
+                    </div>
+                    <div class="lv-body" ng-show="error == true">
+                        <div class="lv-item media">
+                            <div class="alert alert-danger fade in">{{errorMSG}}</div>
+                        </div>
+                    </div>
+                    <div class="lv-body" ng-if="discussions.length == 0">
+                        <div class="lv-item media">
+                            <div class="alert alert-danger fade in">Il n'y a pas de messages.</div>
+                        </div>
+                    </div>
+                    <div class="lv-body">
+                        <div class="lv-item media fades" dir-paginate="chat in discussions | itemsPerPage: 10 | filter:search ">
+                            <a class="lv-link-to-chat" ng-click="getChat(chat.id)"></a>
+                            <div class="checkbox pull-left">
+                                <label>
+                                    <input type="checkbox" ng-model="selectedConversations[chat._id]">
+                                    <i class="input-helper"></i>
+                                </label>
+                            </div>
+                            <div class="media-body">
+                                <div class="lv-title" ng-click="getChat(chat.id)"> Chat With {{chat.correspondant.firstName}} {{chat.correspondant.lastName}} <span class="badge" ng-show='chat.incoming'>{{chat.newMessages}}</span></div>
+                                <small class="lv-small">Last message: <time title="{{ chat.lastOne.date| amDateFormat: 'dddd, MMMM Do YYYY, h:mm a' }}">{{ chat.lastOne.date | amCalendar }}</time>
+                                </small>
+                                <div class="lv-actions actions dropdown" uib-dropdown>
+                                    <a href="" uib-dropdown-toggle aria-expanded="true">
+                                        <i class="zmdi zmdi-more-vert"></i>
+                                    </a>
+                                    <ul class="dropdown-menu dropdown-menu-right">
+                                        <li>
+                                            <a ng-click="deleteModal(chat._id, $index)">Remove conversation</a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <div class="lv-pagination">
+                    <dir-pagination-controls></dir-pagination-controls>
+                </div>
+            </div>
+        </div>
+    </section>
+</section>
+<footer id="footer" data-ng-include="'template/footer.ejs'"></footer>

@@ -1,0 +1,204 @@
+<header id="header" data-current-skin={{mactrl.currentSkin}} data-ng-include="'template/header.ejs'" data-ng-controller="headerCtrl as hctrl"></header>
+<section id="main">
+	<aside id="sidebar" data-ng-include="'template/sidebar-left.ejs'" data-ng-class="{ 'toggled': mactrl.sidebarToggle.left === true }"></aside>
+	<section id="content" >
+<div class="card" data-ng-controller="userController">
+	<div class="card" data-ng-controller="usersController">
+    <script type="text/ng-template" id="myModalContent.html">
+        <div class="modal-header">
+            <h3 class="modal-title" id="modal-title">Êtes-vous sûr?</h3>
+        </div>
+        <div class="modal-body" id="modal-body">
+            Êtes-vous sûr de vouloir continuer?
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-success" type="button" ng-click="ok()">OK</button>
+            <button class="btn btn-danger" type="button" ng-click="cancel()">Annuler</button>
+        </div>
+    </script> 
+	<div class="card-header" ng-if="usertype == 1">
+		<button class="btn btn-primary" data-ui-sref="update-doctor">Modifier profil</button>
+		<ul class="actions article-actions m-t-5">
+			<li>
+				<button href="" class="btn btn-default" ng-click="deleteUser(user.id)">
+				<i class="zmdi zmdi-delete" ></i>
+				<span>Supprimer profil</span>
+				</button>
+			</li>
+		</ul>
+	</div>
+	<div class="card-body body-padding" id="profile-main" ng-hide='hideSpinner' us-spinner spinner-key="spinner-1" spinner-start-active="true" spinner-theme="bigBlue">
+	           	<div class="lv-item media" >
+	         	</div>
+	</div>
+	<div class="card-body body-padding" id="profile-main">
+		<div class="row">
+			<div class="col-md-8 col-md-offset-2">
+				<h2>Docteur {{user.firstName}} {{user.lastName}}, <span>{{user.position}}</span></h2>
+				<table class="table table-user-info">
+					<tr>
+						<td> <span>Numéro de téléphone</span> </td>
+						<td> {{user.phoneNumber}} </td>
+					</tr>
+					<tr>
+						<td> <span>E-mail</span> </td>
+						<td> {{user.email}} </td>
+					</tr>
+				</table>
+				<h2><span>Calendrier médecin</span></h2>
+				
+   					 <section id="content" data-ng-controller="calendarController as clctrl">
+					<div>
+						
+						<!--<div id="calendar" data-calendar data-action-links="clctrl.actionMenu" data-select="clctrl.onSelect(start, end)"></div>-->
+							<div id="calendar" ui-calendar="uiConfig.calendar" ng-model="profile_eventSources" disabled='true' disabled ng-disabled="true"></div>
+						
+						<!-- Add event
+						<script type="text/ng-template" id="addEvent.ejs">
+						<div class="modal-body appoinment-dialog ">
+							<div class="card">
+								<div class="card-body">
+									<div class="row">
+										<div class="col-md-4">
+											<div class="listview lv-bordered lv-lg ">
+												<div class="lv-body lv-user">
+													<div class="lv-item media side-title">
+														<h2 class="lvh-label">Choose Doctor</h2>
+													</div>
+													<div class="c-overflow mCS-autoHide">
+														<div class="lv-item media">
+															<div class="pull-left">
+																<img class="lv-img-sm" src="img/profile-pics/1.jpg" alt="">
+															</div>
+															<div class="media-body">
+																<div class="lv-title">Doctor Name <span>position</span></div>
+															</div>
+														</div>
+														<div class="lv-item media">
+															<div class="pull-left">
+																<img class="lv-img-sm" src="img/profile-pics/1.jpg" alt="">
+															</div>
+															<div class="media-body">
+																<div class="lv-title">Doctor Name <span>position</span></div>
+															</div>
+														</div>
+														<div class="lv-item media">
+															<div class="pull-left">
+																<img class="lv-img-sm" src="img/profile-pics/1.jpg" alt="">
+															</div>
+															<div class="media-body">
+																<div class="lv-title">Doctor Name <span>position</span></div>
+															</div>
+														</div>
+														<div class="lv-item media">
+															<div class="pull-left">
+																<img class="lv-img-sm" src="img/profile-pics/1.jpg" alt="">
+															</div>
+															<div class="media-body">
+																<div class="lv-title">Doctor Name <span>position</span></div>
+															</div>
+														</div>
+													</div>
+												</div>
+											</div>
+										</div>
+										<div class="col-md-8 p-20">
+											<div class="title">
+												Add appointment for John Doe
+											</div>
+											<form>
+												<div class="form-group">
+													<label>Time</label>
+													<div class="row">
+														<div class="col-xs-4">
+															<div class="select">
+																<select class="form-control">
+																	<option>12</option>
+																</select>
+															</div>
+														</div>
+														<div class="col-xs-4">
+															<div class="select">
+																<select class="form-control">
+																	<option>30</option>
+																</select>
+															</div>
+														</div>
+													</div>
+												</div>
+												<div class="form-group">
+													<div class="row">
+														<div class="col-sm-6">
+															<div class="listview lv-bordered lv-lg">
+																<div class="lv-body lv-user">
+																	<div class="lv-item media">
+																		<div class="pull-left">
+																			<img class="lv-img-sm" src="img/profile-pics/1.jpg" alt="">
+																		</div>
+																		<div class="media-body">
+																			<div class="lv-title">Doctor Name <span>position</span></div>
+																		</div>
+																		<div class="close"><i class="zmdi zmdi-close zmdi-hc-fw"></i></div>
+																	</div>
+																</div>
+															</div>
+														</div>
+													</div>
+												</div>
+												<div class="form-group">
+													<div class="fg-line">
+														<textarea class="form-control" rows="10" placeholder="Let us type some lorem ipsum...."></textarea>
+													</div>
+												</div>
+												<div class="form-group text-right">
+													<button class="btn btn-default" data-ng-click="eventDismiss()">Annuler</button>
+													<button class="btn btn-primary">Add</button>
+												</div>
+											</form>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+						</script> 
+						-->
+					</div>
+				</section>
+				<h2><span>Patients</span></h2>
+				<div class="listview lv-bordered doctors-patients lv-lg">
+					<div class="lv-body lv-user">
+						
+						
+						<div class="lv-item media" ng-repeat="doc_patient in profile_events | unique: 'id'">
+							<div class="pull-left" data-ui-sref="singleChat">
+								<img class="lv-img-sm" src="img/profile-pics/1.jpg" alt="">
+							</div>
+							<div class="media-body">
+								<div class="lv-title" ng-click="userProfile(doc_patient.id)">Patient {{doc_patient.title}}</div>
+								<a data-ui-sref="singleChat" class="pull-right" ng-if="usertype != 3">
+									Commencer Discussion
+								</a>
+							</div>
+						</div>
+						
+						<div  class="lv-item media" ng-hide="profile_events.length != 0">
+							Aucun patient affecté à ce médecin !
+							
+						</div>
+						
+						
+						
+					
+					
+			
+					</div>
+					<!--<div class="text-center  m-10">-->
+					<!--	<button class="btn btn-primary">Load more</button>-->
+					<!--</div>-->
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+	</section>
+</section>

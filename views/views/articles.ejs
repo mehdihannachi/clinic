@@ -1,0 +1,181 @@
+<header id="header" data-current-skin={{mactrl.currentSkin}} data-ng-include="'template/header.ejs'" data-ng-controller="headerCtrl as hctrl"></header>
+<section id="main">
+	<aside id="sidebar" data-ng-include="'template/sidebar-left.ejs'" data-ng-class="{ 'toggled': mactrl.sidebarToggle.left === true }"></aside>
+	<section id="content" >
+<div class="card" data-ng-app="materialAdmin" data-ng-controller='newsController' data-ng-cloak>
+<script type="text/ng-template" id="myModalContent.html">
+        <div class="modal-header">
+            <h3 class="modal-title" id="modal-title">Êtes-vous sûr?</h3>
+        </div>
+        <div class="modal-body" id="modal-body">
+            Êtes-vous sûr de vouloir continuer?
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-success" type="button" ng-click="ok()">OK</button>
+            <button class="btn btn-danger" type="button" ng-click="cancel()">Annuler</button>
+        </div>
+    </script>  
+    <div class="listview lv-bordered lv-lg" >
+        <div class="lv-header-alt clearfix">
+            <h2 class="lvh-label hidden-xs">{{totalItems}} Articles</h2>
+            
+            <div class="dropdown" uib-dropdown="">
+                <a href="" uib-dropdown-toggle="" aria-expanded="false" class="dropdown-toggle" aria-haspopup="true">
+                    {{ShowOption}} <i class="zmdi zmdi-chevron-down zmdi-hc-fw"></i>
+                </a>
+                <ul class="dropdown-menu dropdown-menu-right">
+                    <li>
+                        <a href ng-click="OnlyAll()">Show All</a>
+                        <a href ng-click="onlyPublished()">Publishes Articles</a>
+                        <a href ng-click="onlyDraft()">Drafts</a>
+                    </li>
+                </ul>
+            </div>
+            
+            <!-- Bar search by Mahdi-->
+            <!--<input type="text" placeholder="Start typing..." class="lvhs-input" ng-model="search.title">-->
+            
+            <div class="lvh-search" ng-hide="!mactrl.listviewSearchStat">
+                <input type="text" placeholder="Start typing..." class="lvhs-input" ng-model="search.title">
+                <i class="lvh-search-close" ng-click="mactrl.listviewSearchStat = false; search.title ='' ">&times;</i>
+            </div>
+            
+            
+            <ul class="lv-actions actions" ng-init="articles">
+                <li><button data-ui-sref="new-article" class="btn btn-primary btn-vawe">Add new article</buttin></li>
+                <li>
+                    <a href="" data-ng-click="mactrl.listviewSearchStat = true">
+                        <i class="zmdi zmdi-search"></i>
+                    </a>
+                </li>
+                <li class="dropdown" uib-dropdown>
+                    <a href="" uib-dropdown-toggle aria-expanded="true">
+                        <i class="zmdi zmdi-more-vert"></i>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-right">
+                        <li>
+                            <a href ng-click="ActionOnSelected(1,selectedNews)">Transférer vers Brouillon</a>
+                            <a href ng-click="ActionOnSelected(2,selectedNews)">Supprimer la sélection</a>
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+        <div class="lv-body" ng-hide='hideSpinner' us-spinner spinner-key="spinner-1" spinner-start-active="true" spinner-theme="bigBlue">
+            <div class="lv-item media" >
+            </div>
+            </div>
+        <div class="lv-body" ng-show="error == true" >
+			
+            <div class="lv-item media">
+                <div class="alert alert-danger fade in" >{{errorMSG}}</div>
+            </div>
+        </div>
+                
+         <div class="lv-body" ng-show="allArticles == 1">
+			<div dir-paginate="article in articles | itemsPerPage: 5 | filter:search " pagination-id="all">
+
+            <div class="lv-item media fades" ng-cloak  >
+                <div class="checkbox pull-left">
+                    <label>
+                        <input type="checkbox" ng-model="selectedNews[article._id]" >
+                        <i class="input-helper"></i>
+                    </label>
+                </div>
+                <div class="media-body" ng-click="updateArticle(article._id)">
+                    <div class="lv-title">{{article.title}}</div>
+                    <time title="{{ article.created_at| amDateFormat: 'dddd, MMMM Do YYYY, h:mm a' }}">{{ article.created_at | amCalendar }}</time>
+                    <ul class="lv-actions actions">
+                        <li>
+                            <a href="" ng-click="deleteModal(article._id)">
+                                <i class="zmdi zmdi-delete"></i>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="" ng-click="updateArticle(article._id)">
+                                <i class="zmdi zmdi-edit zmdi-hc-fw"></i>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            
+            
+        </div>
+        </div>
+         <div class="lv-body" ng-show="draftArticles == 1">
+			    <div dir-paginate="article in drafts | itemsPerPage: 5 | filter:search " pagination-id="draft">
+
+            <div class="lv-item media" ng-cloak >
+                <div class="checkbox pull-left">
+                    <label>
+                        <input type="checkbox" ng-model="selectedNews[article._id]" >
+                        <i class="input-helper"></i>
+                    </label>
+                </div>
+                <div class="media-body" ng-click="updateArticle(article._id)">
+                    <div class="lv-title">{{article.title}}</div>
+                    <time title="{{ article.created_at| amDateFormat: 'dddd, MMMM Do YYYY, h:mm a' }}">{{ article.created_at | amCalendar }}</time>
+                    <ul class="lv-actions actions">
+                        <li>
+                            <a href="" ng-click="deleteModal(article._id)">
+                                <i class="zmdi zmdi-delete"></i>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="" ng-click="updateArticle(article._id)">
+                                <i class="zmdi zmdi-edit zmdi-hc-fw"></i>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            
+            
+        </div>
+        </div>
+         <div class="lv-body" ng-show="publishedArticles == 1">
+		   <div dir-paginate="article in published | itemsPerPage: 5 | filter:search " pagination-id="published">
+
+            <div class="lv-item media" ng-cloak >
+                <div class="checkbox pull-left">
+                    <label>
+                        <input type="checkbox" ng-model="selectedNews[article._id]" >
+                        <i class="input-helper"></i>
+                    </label>
+                </div>
+                <div class="media-body" ng-click="updateArticle(article._id)">
+                    <div class="lv-title">{{article.title}}</div>
+                    <time title="{{ article.created_at| amDateFormat: 'dddd, MMMM Do YYYY, h:mm a' }}">{{ article.created_at | amCalendar }}</time>
+                    <ul class="lv-actions actions">
+                        <li>
+                            <a href="" ng-click="deleteModal(article._id)">
+                                <i class="zmdi zmdi-delete"></i>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="" ng-click="updateArticle(article._id)">
+                                <i class="zmdi zmdi-edit zmdi-hc-fw"></i>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            </div>
+            
+            
+        </div>
+    </div>
+    
+    <div class="lv-pagination" ng-show="draftArticles == 1">
+      <dir-pagination-controls pagination-id="draft"></dir-pagination-controls>
+    </div>
+    <div class="lv-pagination" ng-show="publishedArticles == 1">
+      <dir-pagination-controls pagination-id="published"></dir-pagination-controls>
+    </div>
+    <div class="lv-pagination" ng-show="allArticles == 1">
+      <dir-pagination-controls pagination-id="all"></dir-pagination-controls>
+    </div>
+</div>
+	</section>
+</section>

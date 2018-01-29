@@ -1,0 +1,123 @@
+<header id="header" data-current-skin={{mactrl.currentSkin}} data-ng-include="'template/header.ejs'" data-ng-controller="headerCtrl as hctrl"></header>
+<section id="main">
+	<aside id="sidebar" data-ng-include="'template/sidebar-left.ejs'" data-ng-class="{ 'toggled': mactrl.sidebarToggle.left === true }"></aside>
+	<section id="content" >
+				<script>
+	        $(window).scroll(function(){
+      if ($(this).scrollTop() > 10) {
+          $('#fixed_head').addClass('fixed');
+      } else {
+          $('#fixed_head').removeClass('fixed');
+      }
+  });
+	    </script>
+<div class="card" data-ng-controller='userUpdateController'>
+	<script type="text/ng-template" id="myModalContent.html">
+        <div class="modal-header">
+            <h3 class="modal-title" id="modal-title">Are you sure?</h3>
+        </div>
+        <div class="modal-body" id="modal-body">
+            Are you sure you want to proceed?
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-success" type="button" ng-click="ok()">OK</button>
+            <button class="btn btn-danger" type="button" ng-click="cancel()">Annuler</button>
+        </div>
+    </script>
+	<div class="card-header" id="fixed_head">
+		<h2 class="lvh-label hidden-xs">Edit nurse profile</h2>
+		<ul class="actions article-actions pull-left m-t-5">
+			<li><button data-ui-sref="users" href="#/users/all" class="m-r-5 btn btn-default waves-effect">Annuler</button></li>
+			<li><button href="#/users/" class="btn btn-primary waves-effect" ng-click='updateUser(accountForm.$valid)' >Update user</button></li>
+		</ul>
+		</ul>
+	</div>
+	<div class="card-body body-padding">
+		<div class="row">
+			<div class="col-sm-8 col-md-6 col-sm-offset-2 col-md-offset-3">
+				<form name="accountForm" novalidate  ng-class="{true:'submitted'}[submitted]">
+					
+					<div class="form-group text-center" >
+						<div class="alert alert-danger fade in" ng-show="error == true">{{errorMSG}}</div>
+						<div class="lv-body" ng-hide='hideSpinner' us-spinner spinner-key="spinner-1" spinner-start-active="true" spinner-theme="bigBlue">
+			            	<div class="lv-item media" >
+			            	</div>
+			            </div>
+						<div class="fileinput fileinput-new" data-provides="fileinput">
+							<!--<div class="fileinput-preview thumbnail">-->
+							<!--<img-crop image="myImage2" result-image="myCroppedImage2" area-type="rectangle"></img-crop>-->
+									<!--<img class="ui bordered centered image"   src="/images/doctor_female.png"  />-->
+							<!--		<img   ng-src="{{myImage2}}"  />-->
+							<!--</div>-->
+							
+							<!--<div>-->
+							<!--	<span class="btn btn-info btn-file">-->
+							<!--		<span class="fileinput-new">Upload photo</span>-->
+							<!--		<span class="fileinput-exists">Change</span>-->
+							<!--		<input type="file"  id="fileInput" name="...">-->
+							<!--	</span>-->
+							<!--	<a href="#" class="btn btn-danger fileinput-exists" data-dismiss="fileinput">Remove</a>-->
+							<!--</div>--> 
+							<div class="row">
+								<img ng-show="image.src" ng-src="{{image.src}}" style=" background-size: cover; display: block;  width: 250px;"  />
+							</div>
+							</br>
+							<div class="row">
+								<span class="btn btn-info btn-file"  style="cursor:pointer">
+									<span class="fileinput-new"  >Upload photo</span>
+									<span class="fileinput-exists">Change</span>
+									<input type="file"  id="file-input" name="myImage" image-with-preview ng-model="image" accept="image/jpeg,image/png" />
+								</span>
+							</div>
+						</div>
+					</div>
+
+					<div class="form-group fg-line">
+						<label for="fName">First name</label>
+						<input type="text" class="form-control input-sm" id="fName" ng-model='user.firstName' ng-required="true">
+					</div>
+
+					<div class="form-group fg-line">
+						<label for="lName">Last name</label>
+						<input type="text" class="form-control input-sm" id="lName" ng-model='user.lastName' ng-required="true">
+					</div>
+
+					<div class="form-group fg-line">
+						<label for="phone">Phone number</label>
+						<input type="phone" class="form-control input-sm" id="phone" ng-model='user.phoneNumber' ng-required="true">
+					</div>
+
+					<div class="form-group fg-line">
+						<label for="email">Email</label>
+						<input type="email" class="form-control input-sm" id="email" ng-model='user.email' ng-required="true">
+					</div>
+<!--
+					<div class="form-group checkbox">
+						<label>
+							<input type="checkbox" value="" ng-model="checked" >
+							<i class="input-helper"></i>
+							Generate password
+						</label>
+					</div>
+					
+					<div class="row">
+						<div class="col-sm-6">
+							<div class="form-group fg-line">
+								<label for="password">Password</label>
+								<input type="password" class="form-control input-sm" id="password" ng-disabled="checked" ng-model='user.password'>
+							</div>
+						</div>
+						<div class="col-sm-6">
+							<div class="form-group fg-line">
+								<label for="confPassword">Confirm password</label>
+								<input type="password" class="form-control input-sm" id="confPassword" ng-disabled="checked" ng-model='user.confPassword'>
+							</div>
+						</div>
+					</div>-->
+				</form>
+			</div>
+		</div>
+	</div>
+</div>
+	</section>
+</section>

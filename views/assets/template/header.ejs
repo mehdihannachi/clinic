@@ -1,0 +1,44 @@
+<ul class="header-inner clearfix">
+    <li id="menu-trigger" data-target="mainmenu" data-toggle-sidebar data-model-left="mactrl.sidebarToggle.left" data-ng-class="{ 'open': mactrl.sidebarToggle.left === true }">
+        <div class="line-wrap">
+            <div class="line top"></div>
+            <div class="line center"></div>
+            <div class="line bottom"></div>  
+        </div>
+    </li>
+
+   <li class="hidden-xs" >
+        <a href="/" class="m-l-10" data-ng-click="mactrl.sidebarStat($event)">
+            <!--<img src="img/demo/logo-r.png" alt="">-->
+            </a>
+    </li>
+
+    <li class="pull-right">
+        <ul class="top-menu">
+
+           <!-- <li id="toggle-width">
+                <div class="toggle-switch">
+                    <input id="tw-switch" type="checkbox" hidden="hidden" data-change-layout="mactrl.layoutType" >
+                    <label for="tw-switch" class="ts-helper"></label>
+                </div>
+            </li>-->
+            <!--<li id="top-search">-->
+            <!--    <a href="" data-ng-click="hctrl.openSearch()"><i class="tm-icon zmdi zmdi-search"></i></a>-->
+            <!--</li>-->
+            <li id="sign-out">
+                <a data-ui-sref="update-user"><i class="zmdi zmdi-settings zmdi-hc-fw tm-icon"></i></a>
+            </li>
+            <li id="sign-out">
+                <a href="logout"><i class="zmdi zmdi-sign-in zmdi-hc-fw tm-icon"></i></a>
+            </li>
+        </ul>
+    </li>
+</ul>
+
+<!-- Top Search Content -->
+<div id="top-search-wrap">
+    <div class="tsw-inner">
+        <i id="top-search-close" class="zmdi zmdi-arrow-left" data-ng-click="hctrl.closeSearch()"></i>
+        <input type="text">
+    </div>
+</div>

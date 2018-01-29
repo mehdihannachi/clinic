@@ -1,0 +1,117 @@
+<script>
+var Socket = io.connect({
+        transports: ['websocket']
+    });
+    </script>
+<header id="header" data-current-skin={{mactrl.currentSkin}} data-ng-include="'template/header.ejs'" data-ng-controller="headerCtrl as hctrl"></header>
+<section id="main">
+    <aside id="sidebar" data-ng-include="'template/sidebar-left.ejs'" data-ng-class="{ 'toggled': mactrl.sidebarToggle.left === true }"></aside>
+    <section id="content" data-ng-controller="chatSingleController" ng-cloak>
+        <script type="text/ng-template" id="myModalContent.html">
+        <div class="modal-header">
+            <h3 class="modal-title" id="modal-title">Are you sure?</h3>
+        </div>
+        <div class="modal-body" id="modal-body">
+            Are you sure you want to proceed?
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-danger" type="button" ng-click="ok()">OK</button>
+            <button class="btn btn-success" type="button" ng-click="cancel()">Annuler</button>
+        </div>
+    </script>  
+        <div class="container">
+            <div class="card m-b-0" id="messages-main">
+                <div class="ms-menu" data-ng-class="{ 'toggled': mactrl.lvMenuStat }">
+                    <div class="ms-block">
+                        <div class="ms-user">
+                           
+                            <img class="lv-avatar" data-ng-src="{{connectedUser.profile_picture}}" alt="">
+                                
+                            <div>
+                            Signed in as <br/> {{connectedUser.email}}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="listview lv-user m-t-20 chat-list" ng-controller="chatController">
+                        
+                        <!--<div class="lv-item media active" >
+                            <div class="lv-avatar pull-left">
+                                <img ng-src="img/{{correspondant.profile_picture}}" alt="">
+                            </div>
+                            <div class="media-body">
+                                <div class="lv-title">{{discussion.correspondant.firstName}} {{discussion.correspondant.lastName}}</div>
+                                <div class="lv-small"></div>
+                            </div>
+                        </div>-->
+
+                        
+                        <div class="lv-item media fades" ng-repeat="chat in chatDiscussions | filter:search | orderBy: '-lastOne.date'" ng-click="selectChat(chat.id)" ng-hide='{{showChat}}' ng-cloak>
+                            <div class="lv-avatar pull-left"><img data-ng-src="{{chat.correspondant.profile_picture}}" alt=""></div>
+                            <div class="media-body">
+                                <div class="lv-title">{{chat.correspondant.firstName}} {{chat.correspondant.lastName}} </div>
+                                <div class="lv-small">{{chat.lastOne.content  | limitTo : 15 : begin}}...</div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+                <div class="ms-body">
+                    <div class="listview lv-message">
+                        <div class="lv-header-alt clearfix">
+                            <div id="ms-menu-trigger"  data-ng-class="{ 'open': mactrl.lvMenuStat }" data-ng-click="mactrl.lvMenuStat = (mactrl.lvMenuStat===true ? false : true )">
+                                <div class="line-wrap">
+                                    <div class="line top"></div>
+                                    <div class="line center"></div>
+                                    <div class="line bottom"></div>
+                                </div>
+                            </div>
+
+                            <a class="lvh-label hidden-xs" data-ui-sref="users.profilePatient">
+                                <div class="lv-avatar pull-left">
+                                    <img ng-src="{{discussion.correspondant.profile_picture}}" alt="" >
+                                </div>
+                                <span class="c-black">{{discussion.correspondant.firstName}} {{discussion.correspondant.lastName}}</span>
+                            </a>
+
+                            <ul class="lv-actions actions">
+                                <li class="dropdown" uib-dropdown>
+                                    <a href="" uib-dropdown-toggle aria-expanded="true">
+                                        <i class="zmdi zmdi-more-vert"></i>
+                                    </a>
+                                    <ul class="dropdown-menu dropdown-menu-right">
+                                        <li>
+                                            <a ng-click="deleteModal(discussion._id)">Remove this conversation</a>
+                                        </li>
+                                    </ul>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="lv-body single-chat" id='div1' scroll-glue us-spinner spinner-key="spinner-chat" spinner-start-active="true" spinner-theme="bigBlue">
+                            <div ng-repeat="message in chatDiscussion.messages" ng-class="message.messageClass">
+                                <div ng-class="{'lv-avatar pull-left': message.user_avatar=='lv-avatar pull-left', 'lv-avatar pull-right': message.user_avatar=='lv-avatar pull-right'}" >
+                                    
+                                    <img ng-src="{{message.fromUser.profile_picture}}" alt="" >
+                                </div>
+                                <div class="media-body">
+                                    <div class="ms-item" ng-bind-html="message.content">
+                                         
+                                        </div>
+                                    <small class="ms-date"><time title="{{ message.date| amDateFormat: 'dddd, MMMM Do YYYY, h:mm a' }}">{{ message.date | amCalendar }}</time>
+</small>
+                                </div>
+                            </div>
+
+                        </div>
+                        <div class="clearfix"></div>
+                        <div class="lv-footer ms-reply">
+                            <textarea placeholder="What's on your mind..." ng-model="messageText" ></textarea>
+                            <button   ng-click="sendMessage()"  ><i class="zmdi zmdi-mail-send"></i></button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</section>
+<footer id="footer" data-ng-include="'template/footer.ejs'"></footer>

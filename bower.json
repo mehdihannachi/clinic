@@ -1,0 +1,23 @@
+{
+  "name": "laRose",
+  "main": "app.js",
+  "homepage": "https://github.com/angular/angular-seed",
+  "authors": [
+    "MEHDI <mehdi.hannachi@kawami.io>"
+  ],
+  "description": "clinique",
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "app/bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "angular-timeline": "^1.7.0",
+    "angular-scroll-animate": "^0.9.9",
+    "angular-timelinejs3": "^0.2.3"
+  }
+}

@@ -1,0 +1,65 @@
+<md-dialog class="dialog" data-ng-controller="dialogCtrl as actrl">
+	<md-dialog-content ng-cloak>
+		<div class="card">
+			<div class="card-header">
+				<h2 class="lvh-label">Add reminder for John Doe</h2>
+			</div>
+			<div class="card-body body-padding">
+				<form>
+					<div class="form-group">
+						<div class="row">
+							<div class="col-xs-4">
+								<div class="select">
+									<select class="form-control">
+										<option>MM</option>
+									</select>
+								</div>
+							</div>
+							<div class="col-xs-4">
+								<div class="select">
+									<select class="form-control">
+										<option>DD</option>
+									</select>
+								</div>
+							</div>
+							<div class="col-xs-4">
+								<div class="select">
+									<select class="form-control">
+										<option>YY</option>
+									</select>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="form-group">
+						<div class="row">
+							<div class="col-xs-4">
+								<div class="select">
+									<select class="form-control">
+										<option>12</option>
+									</select>
+								</div>
+							</div>
+							<div class="col-xs-4">
+								<div class="select">
+									<select class="form-control">
+										<option>30</option>
+									</select>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="form-group">
+						<div class="fg-line">
+		                    <textarea class="form-control" rows="10" placeholder="Let us type some lorem ipsum...."></textarea>
+		                </div>
+					</div>
+					<div class="form-group text-right">
+						<button class="btn btn-default" ng-click="closeDialog()">Annuler</button>
+						<button class="btn btn-primary">Add</button>
+					</div>
+				</form>
+			</div>
+		</div>
+	</md-dialog-content>
+</md-dialog>

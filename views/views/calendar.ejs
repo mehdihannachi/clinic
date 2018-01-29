@@ -1,0 +1,623 @@
+<header id="header" data-current-skin={{mactrl.currentSkin}} data-ng-include="'template/header.ejs'" data-ng-controller="headerCtrl as hctrl"></header>
+<section id="main">
+    <aside id="sidebar" data-ng-include="'template/sidebar-left.ejs'" data-ng-class="{ 'toggled': mactrl.sidebarToggle.left === true }"></aside>
+    <section id="content" data-ng-controller="calendarController as clctrl">
+        <style>
+            #external-events {
+                /*padding: 0 10px;*/
+                /*border: 1px solid #ccc;*/
+                padding: 6px 2px;
+                overflow-y: scroll;
+                max-height: 243px;
+                margin-bottom: 13px;
+                text-align: left;
+                background-color: rgb(250, 250, 250);
+            }
+            
+            #external-events h4 {
+                font-size: 16px;
+                margin-top: 0;
+                padding-top: 1em;
+            }
+            
+            #external-events .fc-doctor {
+                text-align: center;
+                color: #fff;
+                background-color: #e74285;
+                margin: 10px 0;
+                cursor: pointer;
+            }
+            
+            #external-events .fc-patient {
+                text-align: center;
+                background-color: #66c7c1;
+                color: #fff;
+                margin: 10px 0;
+                cursor: pointer;
+            }
+            
+            .fc-rdv {
+                text-align: center;
+                background-color: #66c7c1;
+                color: #fff;
+                margin: 10px 0;
+                cursor: pointer;
+                display: inline;
+            }
+            
+            #external-events p {
+                margin: 1.5em 0;
+                font-size: 11px;
+                color: #666;
+            }
+            
+            #external-events p input {
+                margin: 0;
+                vertical-align: middle;
+            }
+        </style>
+
+
+
+        <script type="text/ng-template" id="modalRdvContent.html">
+            <div class="modal-header">
+                <button type="button" class="close" datadismiss="modal" ng-click="cancel()">&times;</button>
+                <h3 class="modal-title" id="modal-title">Quel type de rendez-vous vous voulez avoir?</h3>
+            </div>
+            <div class="modal-body" id="modal-body">
+                <div class="footer-wrap modern">
+                    <div class="alert alert-danger fade in" ng-show="error == true">
+                        {{errorMSG}}
+                    </div>
+                    <div class="contact-us">
+                        <form id="contact-us" name="rdvForm" novalidate ng-class="{true:'submitted'}[submitted]" class="medic-form-control m-bottom-40 drawer-form form-group">
+                            <div class="row">
+                                <table>
+                                    <tr>
+                                        <td><input type="radio" ng-model="etat" value="2" id="accept" class="medic-input-radio" required ng-required="true"></td>
+                                        <td>
+                                            <label class="drawer-element-label" for="accept">Accepter Rendez-vous</label></td>
+
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <input type="radio" ng-model="etat" value="3" id="refuse" class="medic-input-radio" required ng-required="true"></td>
+                                        <td>
+                                            <label class="drawer-element-label" for="refuse">Refuser Rendez-vous</label></td>
+
+                                    </tr>
+                                </table>
+                                <button class="btn btn-success" type="button" ng-click="ok(rdvForm.$valid)">Valider</button>
+                                <button class="btn btn-danger" type="button" ng-click="cancel()">Annuler</button>
+
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </script>
+
+
+
+        <div class="container-fluid c-alt">
+
+            <div confirm-on-exit="exitcalendar" confirm-message-window="Tout vos changement seront perdu." confirm-message-route="Tout vos changement seront perdu, êtes-vous sûr de vouloir continuer?"></div>
+
+
+            <div class="row">
+                <div class="col-md-2">
+                    <div style="position: fixed;" data-ng-controller="usersController">
+                        <div id='external-events' ng-show="doctors.length != 0 ">
+                            <h4>Médecins</h4>
+
+                            <div class='fc-doctor' data-ng-repeat="doctor in doctors" id="id:'{{doctor.user_id}}', type:0" items-drag>{{doctor.firstName}} {{doctor.lastName}}</div>
+
+
+
+
+                        </div>
+
+                        <div id='external-events' ng-show="patients.length != 0">
+                            <h4>Patients</h4>
+                            <div class='fc-patient' data-ng-repeat="patient in patients" id="id:'{{patient.user_id}}', type:1" items-drag>{{patient.firstName}} {{patient.lastName}}</div>
+
+
+                        </div>
+
+
+
+                    </div>
+
+
+
+
+                </div>
+                <div class="col-md-10">
+                    <div class="form-group text-right">
+                        <button class="btn btn-success" data-ng-click="save_calendar()">Enregistrer</button>
+                    </div>
+                    <div id="calendar" ui-calendar="uiConfig.calendar" ng-model="eventSources"></div>
+                </div>
+                <div class="col-md-9 col-md-offset-2" style="background-color: #fff;max-height: 190px;overflow-y: auto;position: absolute;top: 205px;left: 50px;" data-ng-controller='rdvDemandsController'>
+
+                    <div class="listview lv-bordered lv-lg">
+                        <div class="lv-header-alt clearfix">
+                            <h2 class="lvh-label hidden-xs">Demandes de Rendez-vous mise en attente</h2>
+
+                            <div class="lv-body">
+                                <div dir-paginate="rdvDemand in on_hold | itemsPerPage: 5 | filter:search | orderBy: 'created_at'" pagination-id="on_hold">
+
+                                    <div class="lv-item media fades" ng-cloak>
+                                        <!--                    <div class="checkbox pull-left">-->
+                                        <!--                        <label>-->
+                                        <!--    <input type="checkbox" ng-model="selectedRdv[rdvDemand._id]" >-->
+                                        <!--    <i class="input-helper"></i>-->
+                                        <!--</label>-->
+                                        <!--                    </div>-->
+                                        <div class="media-body" ng-click="updateArticle(article._id)">
+                                            <div class="lv-title" ><div class='fc-rdv' id="id:'{{rdvDemand.user.user_id}}', type:1" items-drag>{{rdvDemand.user.firstName}} {{rdvDemand.user.lastName}}</div>
+
+                                                <div ng-show="rdvDemand.etat == 1">
+                                                    <span class="fa fa-hourglass-end " style="color:orange;"></span>
+                                                    <span class="glyphicon glyphicon-ok icons-disabled" style="color:green;"></span>
+                                                    <span class="glyphicon glyphicon-remove icons-disabled" style="color:red;"></span>
+                                                </div>
+                                                <div ng-show="rdvDemand.etat == 2">
+                                                    <span class="fa fa-hourglass-end icons-disabled" style="color:orange;"></span>
+                                                    <span class="glyphicon glyphicon-ok" style="color:green;"></span>
+                                                    <span class="glyphicon glyphicon-remove icons-disabled" style="color:red;"></span>
+                                                </div>
+                                                <div ng-show="rdvDemand.etat == 3">
+                                                    <span class="fa fa-hourglass-end icons-disabled" style="color:orange;"></span>
+                                                    <span class="glyphicon glyphicon-ok icons-disabled" style="color:green;"></span>
+                                                    <span class="glyphicon glyphicon-remove" style="color:red;"></span>
+                                                </div>
+                                            </div>
+                                            <div>Type du rendez-vous: {{rdvDemand.type}}</div>
+                                            <time title="{{ rdvDemand.date| amDateFormat: 'dddd, MMMM Do YYYY' }}"> Rendez-vous pour le: {{ rdvDemand.date | amDateFormat: 'dddd, MMMM Do YYYY' }}</time>
+                                            <div>Raison de la consultation: {{rdvDemand.message}}</div>
+                                            <ul class="lv-actions actions">
+                                                <li>
+                                                    <a href="" ng-click="deleteModal(rdvDemand._id)">
+                                                        <i class="zmdi zmdi-delete"></i>
+                                                    </a>
+                                                </li>
+                                                <li>
+                                                    <a href="" ng-click="updateRdvDemand(rdvDemand, rdvDemand._id)">
+                                                        <i class="zmdi zmdi-edit zmdi-hc-fw"></i>
+                                                    </a>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </div>
+
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="lv-pagination" ng-show="on_holdrD == 1">
+                        <dir-pagination-controls pagination-id="on_hold"></dir-pagination-controls>
+                    </div>
+                </div>
+
+
+            </div>
+            <script type="text/ng-template" id="conflictModalContent.html">
+                <div class="modal-header">
+                    <h3 class="modal-title" id="modal-title">Conflict!</h3>
+                </div>
+                <div class="modal-body" id="modal-body">
+                    <div class="col-md-12 text-left">
+                        <div>La demande n'a pas pu etre compléte à cause d'un conflit avec la source.</div>
+                        <div>Un autre utilisateur a modifié le calendrier à {{calendar_update_at}} .</div>
+                        <div>Selectionner "PULL" si vous voulez mettre à jour votre version, ou "PUSH" pour écraser la version existante par la votre.</div>
+
+                    </div>
+                </div>
+                <div class="modal-footer">
+
+                    <button class="btn btn-success" type="button" ng-click="pull()">PULL</button>
+                    <button class="btn btn-danger" type="button" ng-click="push()">PUSH</button>
+                    <div class="text-left" style="color:red"> NB: si vous faite un PUSH, la derniére version sera effacée! </div>
+                </div>
+            </script>
+
+            <!-- Add event   -->
+            <script type="text/ng-template" id="addEvent.ejs">
+                <style>
+                    @media screen and (max-width: 599px) {
+                        .block {
+                            max-width: 100%;
+                        }
+                    }
+                    
+                    .block>div input+label {
+                        cursor: pointer;
+                        display: block;
+                        padding: 7.5px 15px;
+                        color: #fff;
+                        background-color: #0c7cd5;
+                        -webkit-transition: background-color 0.25s ease-in-out 0.5s, color 0.25s ease-in-out 0.5s;
+                        transition: background-color 0.25s ease-in-out 0.5s, color 0.25s ease-in-out 0.5s;
+                    }
+                    
+                    .block>div input~div {
+                        visibility: hidden;
+                        max-height: 0;
+                        padding: 0;
+                        opacity: 0;
+                        -webkit-transition: all 0.5s ease-in-out 0.2s, opacity 0.25s ease-in-out 0.25s, padding 0s ease-in-out 0s;
+                        transition: all 0.5s ease-in-out 0.2s, opacity 0.25s ease-in-out 0.25s, padding 0s ease-in-out 0s;
+                    }
+                    
+                    .block>div input:checked+label {
+                        background-color: rgba(12, 124, 213, 0.36);
+                        color: #fff;
+                        -webkit-transition: background-color 0s ease-in-out 0s;
+                        transition: background-color 0s ease-in-out 0s;
+                    }
+                    
+                    .block>div input:checked~div {
+                        display: block;
+                        opacity: 1;
+                        visibility: visible;
+                        max-height: 332px !important;
+                        padding: 15px 0;
+                        -webkit-transition: all 0.5s ease-in-out 0.2s, opacity 0.25s ease-in-out 0.5s, padding 0s ease-in-out 0s;
+                        transition: all 0.5s ease-in-out 0.2s, opacity 0.25s ease-in-out 0.5s, padding 0s ease-in-out 0s;
+                    }
+                </style>
+                <div class="appoinment-dialog " data-ng-controller="usersController">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="row text-right">
+
+                                <button class="btn btn-default " data-ng-click="eventDismiss()">X</button>
+
+                            </div>
+                            <div class="row">
+                                <div class="col-md-4" style="padding-left: 0px !important; padding-right: 0px !important;">
+                                    <div class="block">
+
+                                        <div>
+                                            <input type="radio" name="item" ng-click="listpatientsearch = false; searchPatients ='' " id="item-one" checked hidden />
+
+                                            <label for="item-one" class="lvh-label">Choisir Médecin
+                                            <div style="    position: absolute;   top: 0;   left: 0;    width: 100%;    z-index: 4;       -webkit-animation-name: 'fadeIn';    animation-name: 'fadeIn';    -webkit-animation-duration: 300ms;
+                                                animation-duration: 300ms;  -webkit-animation-fill-mode: both;   animation-fill-mode: both;" ng-hide="!listdoctorsSearch">
+                                                <input type="text" placeholder="Start typing..." class="lvhs-input" style="color: black !important; height: 49px !important; font-size: 14px !important;" ng-model="searchDoctors">
+                                                <i class="lvh-search-close" style=" top: 15px;" ng-click="listdoctorsSearch = false; searchDoctors ='' ">&times;</i>
+                                            </div>
+                                                    <i class="zmdi zmdi-search" style="float: right; display: inline-block;  margin: 0; font-size: 14px; font-weight: normal; padding: 0 6px; top: 15px; line-height: 33px;   vertical-align: middle;"
+                                                    ng-click="listdoctorsSearch = true"
+                                                    ></i>
+                                                
+                                            
+                                            </label>
+
+                                            <div class="listview lv-bordered lv-lg ">
+                                                <div class="lv-body lv-user" style=" max-height: 450px !important;  ">
+                                                    <div class="c-overflow mCS-autoHide" style=" max-height: 450px !important; " for="item-one">
+                                                        <div class="lv-item media" data-ng-repeat="doctor in doctors | filter:searchDoctors">
+                                                            <div class="pull-left">
+                                                                <img class="lv-img-sm" ng-src="{{doctor.profile_picture}}" alt="img_profile">
+                                                            </div>
+                                                            <div class="media-body" ng-click="select_Appointement(doctor,0)">
+                                                                <div class="lv-title">Médecin {{doctor.firstName}} {{doctor.lastName}} </div>
+                                                                <div><span>{{doctor.position}}</span></div>
+                                                            </div>
+                                                        </div>
+
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div>
+                                            <input type="radio" name="item" id="item-two" ng-click="listdoctorsSearch = false; searchDoctors ='' " hidden />
+                                            <label for="item-two" class="lvh-label">Choisir Patient
+                                             <div style="    position: absolute;   top: 48px;   left: 0;    width: 100%;    z-index: 4;       -webkit-animation-name: 'fadeIn';    animation-name: 'fadeIn';    -webkit-animation-duration: 300ms;
+                                                animation-duration: 300ms;  -webkit-animation-fill-mode: both;   animation-fill-mode: both;" ng-hide="!listpatientsearch">
+                                                <input type="text" placeholder="Start typing..." class="lvhs-input" style="color: black !important; height: 49px !important; font-size: 14px !important;" ng-model="searchPatients">
+                                                <i class="lvh-search-close"  style=" top: 15px;" ng-click="listpatientsearch = false; searchPatients ='' ">&times;</i>
+                                            </div>
+                                                    <i class="zmdi zmdi-search" style="float: right; display: inline-block;  margin: 0; font-size: 14px; font-weight: normal; padding: 0 6px; top: 15px; line-height: 33px;   vertical-align: middle;"
+                                                    ng-click="listpatientsearch = true"
+                                                    ></i>
+                                                
+                                            
+                                            </label>
+
+                                            <div class="listview lv-bordered lv-lg ">
+                                                <div class="lv-body lv-user" style=" max-height: 450px !important; ">
+                                                    <div class="c-overflow mCS-autoHide" style=" max-height: 450px !important; " for="item-two">
+                                                        <div class="lv-item media" data-ng-repeat="patient in patients | filter:searchPatients">
+                                                            <div class="pull-left">
+
+                                                                <img class="lv-img-sm" ng-src="{{patient.profile_picture}}" alt="img_profile">
+                                                            </div>
+                                                            <div class="media-body" ng-click="select_Appointement(patient,1)">
+                                                                <div class="lv-title">{{patient.firstName}} {{patient.lastName}}</div>
+                                                            </div>
+                                                        </div>
+
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </div>
+                                <div class="col-md-8 p-20">
+                                    <div ng-hide="selected_appointement" style="text-align: center; padding: 10%">
+                                        <div class="row">
+                                            <img src="img/icons/choose.png" alt="">
+                                        </div>
+                                        <div class="title">
+                                            Pour ajouter un rendez-vous, vous devez choisir un médecin ou un patient.
+                                        </div>
+
+                                    </div>
+
+
+
+
+
+
+                                    <form ng-show="selected_appointement">
+                                        <div class="title">
+                                            Ajouter un rendez-vous pour {{selector_fullname}}
+                                        </div>
+
+                                        <div class="form-group">
+                                            <div class="row">
+                                                <div class="col-sm-6">
+                                                    <div class="listview lv-bordered lv-lg">
+                                                        <div class="lv-body lv-user">
+                                                            <div class="lv-item media">
+                                                                <div class="pull-left">
+                                                                    <img class="lv-img-sm" src="{{selector_picture}}" alt="">
+                                                                </div>
+                                                                <div class="media-body">
+                                                                    <div class="lv-title">{{selector_fullname}} </div>
+                                                                    <div ng-if="selector_picture"><span>{{selector_position}}</span></div>
+                                                                </div>
+                                                                <div class="close"><i class="zmdi zmdi-close zmdi-hc-fw"></i></div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div ng-show="selector_.type == 0">
+                                            <div class="form-group">
+                                                <label>De</label>
+                                                <div class="row">
+                                                    <div class="col-xs-4">
+                                                        <div class="select">
+                                                            <select class="form-control" ng-model="start.h">
+                                                            <option value="" disabled>Heure</option>
+                                                            <option value="0">00</option>
+                                                            <option value="1">01</option>
+                                                            <option value="2">02</option>
+                                                            <option value="3">03</option>
+                                                            <option value="4">04</option>
+                                                            <option value="5">05</option>
+                                                            <option value="6">06</option>
+                                                            <option value="7">07</option>
+                                                            <option value="8">08</option>
+                                                            <option value="9">09</option>
+                                                             <% for (var i = 10 ; i < 24 ; i++) { %>
+                                                                 <option value="<%= i %>"><%= i  %></option>
+                                                            <% } %>
+                                                       
+                                                    </select>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-xs-4">
+                                                        <div class="select">
+                                                            <select class="form-control" ng-model="start.m">
+                                                         <option value="" disabled>minute</option>
+                                                         <option value="0">00</option>
+                                                            <option value="1">01</option>
+                                                            <option value="2">02</option>
+                                                            <option value="3">03</option>
+                                                            <option value="4">04</option>
+                                                            <option value="5">05</option>
+                                                            <option value="6">06</option>
+                                                            <option value="7">07</option>
+                                                            <option value="8">08</option>
+                                                            <option value="9">09</option>
+                                                             <% for (var i = 10 ; i < 60 ; i++) { %>
+                                                                 <option value="<%= i %>"><%= i  %></option>
+                                                            <% } %>
+                                                    </select>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label>à</label>
+                                                <div class="row">
+                                                    <div class="col-xs-4">
+                                                        <div class="select">
+                                                            <select class="form-control" ng-model="end.h">
+                                                         <option value="" disabled>Heure</option>
+                                                        <option value="0">00</option>
+                                                            <option value="1">01</option>
+                                                            <option value="2">02</option>
+                                                            <option value="3">03</option>
+                                                            <option value="4">04</option>
+                                                            <option value="5">05</option>
+                                                            <option value="6">06</option>
+                                                            <option value="7">07</option>
+                                                            <option value="8">08</option>
+                                                            <option value="9">09</option>
+                                                             <% for (var i = 10 ; i < 24 ; i++) { %>
+                                                                 <option value="<%= i %>"><%= i  %></option>
+                                                            <% } %>
+                                                    </select>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-xs-4">
+                                                        <div class="select">
+                                                            <select class="form-control" ng-model="end.m">
+                                                         <option value="" disabled>minute</option>
+                                                        <option value="0">00</option>
+                                                            <option value="1">01</option>
+                                                            <option value="2">02</option>
+                                                            <option value="3">03</option>
+                                                            <option value="4">04</option>
+                                                            <option value="5">05</option>
+                                                            <option value="6">06</option>
+                                                            <option value="7">07</option>
+                                                            <option value="8">08</option>
+                                                            <option value="9">09</option>
+                                                             <% for (var i = 10 ; i < 60 ; i++) { %>
+                                                                 <option value="<%= i %>"><%= i  %></option>
+                                                            <% } %>
+                                                    </select>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div ng-hide="selector_.type == 0">
+
+
+                                            <div class="form-group">
+                                                <label>Choisir Heure:</label>
+                                                <div class="row">
+                                                    <div class="col-xs-4">
+                                                        <div class="select">
+                                                            <select class="form-control" ng-model="end.h">
+                                                         <option value="" disabled>Heure</option>
+                                                         <option value="0">00</option>
+                                                            <option value="1">01</option>
+                                                            <option value="2">02</option>
+                                                            <option value="3">03</option>
+                                                            <option value="4">04</option>
+                                                            <option value="5">05</option>
+                                                            <option value="6">06</option>
+                                                            <option value="7">07</option>
+                                                            <option value="8">08</option>
+                                                            <option value="9">09</option>
+                                                      
+                                                    </select>
+                                                        </div>
+                                                    </div>
+
+                                                </div>
+                                            </div>
+                                        </div>
+
+
+
+                                        <div class="form-group text-right">
+
+                                            <button class="btn btn-primary" data-ng-click="addEvent(selector_,start,end)">Ajouter Rendez-vous</button>
+                                        </div>
+                                    </form>
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card" ng-show="delete_appointement == true">
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-11">
+                                    <h2 class="lvh-label">
+                                        Voulez vous supprimer cet événement du calendrier ?
+                                    </h2>
+
+
+
+                                </div>
+                                <div class="col-md-1">
+
+                                    <button class="btn btn-danger" data-ng-click="DeleteEvent()">Supprimer</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </script>
+
+
+            <!-- Choose event -->
+            <script type="text/ng-template" id="chooseDoctor.ejs">
+
+                <div class="card">
+                    <div class="card-body">
+
+                        <div class="row" style="background-color: #66c7c1;">
+                            <div class="col-md-9">
+                                <label class="lvh-label" style="     line-height: 40px; color: #fff;">Choisir un médecin pour <span style="background-color: #f44336;">{{patient.title}}</span></label>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="lvh-label" style="     line-height: 40px; color: #fff;">Date : {{consult_date}}</label>
+                            </div>
+
+                        </div>
+
+
+                        <div class="row">
+                            <div class="listview lv-bordered lv-lg ">
+                                <div class="lv-body lv-user" style="  ">
+                                    <div class="mCS_no_scrollbar">
+                                        <div class="lv-item media" ng-repeat="d_octor in doctorsbyday">
+                                            <div class="row" ng-click="setdoctor_topatient(d_octor,patient)">
+                                                <div class="media-body">
+                                                    <div class="col-md-4">
+                                                        <div class="lv-title">Médecin {{d_octor.title}}</div>
+                                                        <div><span>De : {{d_octor.start_h_m}}</span></div>
+                                                        <div><span>à : {{d_octor.end_h_m}}</span></div>
+                                                    </div>
+                                                    <div class="col-md-8">
+                                                        <div class="row" ng-repeat="_patient in d_octor.patients  track by $index">
+                                                            <div class="lv-title col-md-6">Consultation {{$index+1}}: {{_patient.title}} </div>
+                                                            <span>De: {{_patient.start_h_m}} - à: {{_patient.end_h_m}}</span>
+
+                                                        </div>
+                                                        <div class="row" ng-if="d_octor.patients.length == 0">
+                                                            <div class="lv-title">Aucun patients </div>
+                                                        </div>
+
+
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group text-center" ng-show="complet">
+                            <p style="animation-duration: 3s;  animation-name: slidein; animation-iteration-count: infinite; color: red;"> Choisir un autre médecin (Ce médecin est réservé)</p>
+
+                        </div>
+                        <div class="form-group text-right">
+
+                            <button class="btn btn-warning" data-ng-click="eventDismiss()">Plus tard</button>
+                        </div>
+                    </div>
+                </div>
+
+
+            </script>
+
+        </div>
+
+
+
+
+    </section>
+</section>
+<footer id="footer" data-ng-include="'template/footer.ejs'"></footer>

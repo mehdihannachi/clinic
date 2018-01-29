@@ -1,0 +1,100 @@
+<header id="header" data-current-skin={{mactrl.currentSkin}} data-ng-include="'template/header.ejs'" data-ng-controller="headerCtrl as hctrl"></header>
+<section id="main">
+	<aside id="sidebar" data-ng-include="'template/sidebar-left.ejs'" data-ng-class="{ 'toggled': mactrl.sidebarToggle.left === true }"></aside>
+	<section id="content" >
+<div class="card" data-ng-controller="usersController" ng-cloak >
+    <script type="text/ng-template" id="myModalContent.html">
+        <div class="modal-header">
+            <h3 class="modal-title" id="modal-title">Are you sure?</h3>
+        </div>
+        <div class="modal-body" id="modal-body">
+            Are you sure you want to proceed?
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-success" type="button" ng-click="ok()">OK</button>
+            <button class="btn btn-danger" type="button" ng-click="cancel()">Annuler</button>
+        </div>
+    </script>  
+    <div class="listview lv-bordered lv-lg">
+        <div class="lv-header-alt clearfix">
+            <h2 class="lvh-label hidden-xs">
+            <button data-ui-sref="users" class="btn btn-default">All users</button>
+            <button data-ui-sref="admins" class="btn btn-primary">Administrateurs</button>
+            <button data-ui-sref="doctors" class="btn btn-default">Médecins</button>
+            <button data-ui-sref="nurses" class="btn btn-default">Infirmiers</button>
+            <button data-ui-sref="patients" class="btn btn-default">Patients</button>
+            </h2>
+            <div class="lvh-search" ng-hide="!mactrl.listviewSearchStat">
+                <input type="text" placeholder="Start typing..." class="lvhs-input" ng-model="search">
+                <i class="lvh-search-close" ng-click="mactrl.listviewSearchStat = false; search ='' ">&times;</i>
+            </div>
+            <ul class="lv-actions actions">
+                <li>
+                    <a href="" data-ng-click="mactrl.listviewSearchStat = true">
+                        <i class="zmdi zmdi-search"></i>
+                    </a>
+                </li>
+                <li>
+                    <button class="btn btn-primary" data-ui-sref="new-user">Ajouter Utilisateur</button>
+                </li>
+                <li class="dropdown" uib-dropdown>
+                    <a href="" uib-dropdown-toggle aria-expanded="true">
+                        <i class="zmdi zmdi-more-vert"></i>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-right">
+                        <li>
+                            <a href ng-click="RemoveSelected()">Delete selected user</a>
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+        <div class="lv-body" ng-hide='hideSpinner' >
+            <div class="lv-item media fades"  ng-cloak >
+                 <div class="checkbox pull-left">
+                    <label>
+                    </label>
+                </div>
+                <div class="pull-left" ></div>
+                <div class="media-body" us-spinner spinner-key="spinner-1" spinner-start-active="true" spinner-theme="bigBlue">
+                    
+                </div>
+            </div>
+        </div>
+<div class="lv-body" ng-show="errorAdmin == true" >
+			
+            <div class="lv-item media">
+                <div class="alert alert-danger fade in" >{{errorMSGAdmin}}</div>
+            </div>
+        </div>
+        <div class="lv-body">
+            <div dir-paginate="admin in admins | itemsPerPage: 10 | filter:search " >
+            <div class="lv-item media fades" >
+                <a ng-click="userProfile(admin.user_id)" class="lv-link-to-chat"></a>
+                <div class="checkbox pull-left">
+                    <label>
+                        <input type="checkbox" ng-model="selectedUser[admin.id]" >
+                        <i class="input-helper"></i>
+                    </label>
+                </div>
+                <div class="pull-left" ng-click="userProfile(admin.user_id)">
+                    <img class="lv-img-sm" ng-src="{{admin.profile_picture}}" alt="img_profile">
+                </div>
+                <div class="media-body" title="{{ admin.created_at| amDateFormat: 'dddd, MMMM Do YYYY, h:mm a' }}">
+                    <div class="lv-title" ng-click="userProfile(admin.user_id)">{{admin.firstName}} {{admin.lastName}}</div>
+                    <small class="lv-small">
+                    <a href="phone:+123456789"><i class="zmdi zmdi-phone zmdi-hc-fw"></i> {{admin.phoneNumber}}</a>
+                    <a href="mailto:mail@mail.com"><i class="zmdi zmdi-email zmdi-hc-fw"></i> {{admin.email}}</a>
+                    </small>
+                </div>
+            </div>
+            </div>
+        </div>
+    </div>
+    <div class="lv-pagination" >
+      <dir-pagination-controls></dir-pagination-controls>
+    </div>
+    
+</div>
+	</section>
+</section>

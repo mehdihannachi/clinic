@@ -1,0 +1,697 @@
+<header id="header" data-current-skin='{{mactrl.currentSkin}}' data-ng-include="'template/header.ejs'" data-ng-controller="headerCtrl as hctrl"></header>
+<section id="main">
+    <aside id="sidebar" data-ng-include="'template/sidebar-left.ejs'" data-ng-class="{ 'toggled': mactrl.sidebarToggle.left === true }"></aside>
+    <section id="content">
+        <div class="container"></div>
+        <div class="row">
+            <div class="col-sm-6" data-ng-controller="calendarController as clctrl">
+                <!-- Calendar -->
+                <!--<div id="calendar" data-full-calendar></div>-->
+                <div id="calendar-widget" ui-calendar="uiConfig.calendar_small" ng-model="eventSources"></div>
+
+            </div>
+            <div class="col-sm-6 text-center">
+                <h2>Analyse d'audience</h2>
+                <header>
+                    <div id="embed-api-auth-container"></div>
+                    <div id="view-selector-container"></div>
+                    <div id="view-name"></div>
+                    <div id="active-users-container"></div>
+                </header>
+                <div class="Chartjs">
+                    <h3>Cette Semaine vs La semaine dernière (par sessions)</h3>
+                    <figure class="Chartjs-figure" id="chart-container"></figure>
+                    <ol class="Chartjs-legend" id="legend-container"></ol>
+                    <!--</div>-->
+                    <!--<div class="Chartjs">-->
+                    <!--    <h3>This Year vs Last Year (by users)</h3>-->
+                    <!--    <figure class="Chartjs-figure" id="chart-2-container"></figure>-->
+                    <!--    <ol class="Chartjs-legend" id="legend-2-container"></ol>-->
+                    <!--</div>-->
+                    <!--<div class="Chartjs">-->
+                    <!--    <h3>Top Browsers (by pageview)</h3>-->
+                    <!--    <figure class="Chartjs-figure" id="chart-3-container"></figure>-->
+                    <!--    <ol class="Chartjs-legend" id="legend-3-container"></ol>-->
+                    <!--</div>-->
+                    <!--<div class="Chartjs">-->
+                    
+                    <!--    <h3>Top Countries (by sessions)</h3>-->
+                    <!--    <figure class="Chartjs-figure" id="chart-4-container"></figure>-->
+                    <!--    <ol class="Chartjs-legend" id="legend-4-container"></ol>-->
+                </div>
+                <!-- This demo uses the Chart.js graphing library and Moment.js to do date
+     formatting and manipulation. -->
+                <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/1.0.2/Chart.min.js"></script>
+                <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.10.2/moment.min.js"></script>
+
+                <!-- Include the ViewSelector2 component script. -->
+                <script src="js/view-selector2.js"></script>
+
+                <!-- Include the DateRangeSelector component script. -->
+                <script src="js/date-range-selector.js"></script>
+
+                <!-- Include the ActiveUsers component script. -->
+                <script src="js/active-users.js"></script>
+
+                <!-- Include the CSS that styles the charts. -->
+                <link rel="stylesheet" href="css/chartjs-visualizations.css">
+
+                <script>
+                    // == NOTE ==
+                    // This code uses ES6 promises. If you want to use this code in a browser
+                    // that doesn't supporting promises natively, you'll have to include a polyfill.
+
+                    gapi.analytics.ready(function() {
+
+                        /**
+                         * Authorize the user immediately if the user has already granted access.
+                         * If no access has been created, render an authorize button inside the
+                         * element with the ID "embed-api-auth-container".
+                         */
+                        gapi.analytics.auth.authorize({
+                            container: 'embed-api-auth-container',
+                            clientid: '399059803263-96s52gj2ekorl76qjbhlodc84nmc6fj3.apps.googleusercontent.com'
+                        });
+
+
+                        /**
+                         * Create a new ActiveUsers instance to be rendered inside of an
+                         * element with the id "active-users-container" and poll for changes every
+                         * five seconds.
+                         */
+                        var activeUsers = new gapi.analytics.ext.ActiveUsers({
+                            container: 'active-users-container',
+                            pollingInterval: 5
+                        });
+
+
+                        /**
+                         * Add CSS animation to visually show the when users come and go.
+                         */
+                        activeUsers.once('success', function() {
+                            var element = this.container.firstChild;
+                            var timeout;
+
+                            this.on('change', function(data) {
+                                var element = this.container.firstChild;
+                                var animationClass = data.delta > 0 ? 'is-increasing' : 'is-decreasing';
+                                element.className += (' ' + animationClass);
+
+                                clearTimeout(timeout);
+                                timeout = setTimeout(function() {
+                                    element.className =
+                                        element.className.replace(/ is-(increasing|decreasing)/g, '');
+                                }, 3000);
+                            });
+                        });
+
+
+                        /**
+                         * Create a new ViewSelector2 instance to be rendered inside of an
+                         * element with the id "view-selector-container".
+                         */
+                        var viewSelector = new gapi.analytics.ext.ViewSelector2({
+                                container: 'view-selector-container',
+                            })
+                            .execute();
+
+
+                        /**
+                         * Update the activeUsers component, the Chartjs charts, and the dashboard
+                         * title whenever the user changes the view.
+                         */
+                        viewSelector.on('viewChange', function(data) {
+                            var title = document.getElementById('view-name');
+                            title.textContent = data.property.name + ' (' + data.view.name + ')';
+
+                            // Start tracking active users for this view.
+                            activeUsers.set(data).execute();
+
+                            // Render all the of charts for this view.
+                            renderWeekOverWeekChart(data.ids);
+                            renderYearOverYearChart(data.ids);
+                            renderTopBrowsersChart(data.ids);
+                            renderTopCountriesChart(data.ids);
+                        });
+
+
+                        /**
+                         * Draw the a chart.js line chart with data from the specified view that
+                         * overlays session data for the current week over session data for the
+                         * previous week.
+                         */
+                        function renderWeekOverWeekChart(ids) {
+
+                            // Adjust `now` to experiment with different days, for testing only...
+                            var now = moment(); // .subtract(3, 'day');
+
+                            var thisWeek = query({
+                                'ids': ids,
+                                'dimensions': 'ga:date,ga:nthDay',
+                                'metrics': 'ga:sessions',
+                                'start-date': moment(now).subtract(1, 'day').day(0).format('YYYY-MM-DD'),
+                                'end-date': moment(now).format('YYYY-MM-DD')
+                            });
+
+                            var lastWeek = query({
+                                'ids': ids,
+                                'dimensions': 'ga:date,ga:nthDay',
+                                'metrics': 'ga:sessions',
+                                'start-date': moment(now).subtract(1, 'day').day(0).subtract(1, 'week')
+                                    .format('YYYY-MM-DD'),
+                                'end-date': moment(now).subtract(1, 'day').day(6).subtract(1, 'week')
+                                    .format('YYYY-MM-DD')
+                            });
+
+                            Promise.all([thisWeek, lastWeek]).then(function(results) {
+
+                                var data1 = results[0].rows.map(function(row) {
+                                    return +row[2];
+                                });
+                                var data2 = results[1].rows.map(function(row) {
+                                    return +row[2];
+                                });
+                                var labels = results[1].rows.map(function(row) {
+                                    return +row[0];
+                                });
+
+                                labels = labels.map(function(label) {
+                                    return moment(label, 'YYYYMMDD').format('ddd');
+                                });
+
+                                var data = {
+                                    labels: labels,
+                                    datasets: [{
+                                            label: 'Last Week',
+                                            fillColor: 'rgba(220,220,220,0.5)',
+                                            strokeColor: 'rgba(220,220,220,1)',
+                                            pointColor: 'rgba(220,220,220,1)',
+                                            pointStrokeColor: '#fff',
+                                            data: data2
+                                        },
+                                        {
+                                            label: 'This Week',
+                                            fillColor: 'rgba(151,187,205,0.5)',
+                                            strokeColor: 'rgba(151,187,205,1)',
+                                            pointColor: 'rgba(151,187,205,1)',
+                                            pointStrokeColor: '#fff',
+                                            data: data1
+                                        }
+                                    ]
+                                };
+
+                                new Chart(makeCanvas('chart-container')).Line(data);
+                                generateLegend('legend-container', data.datasets);
+                            });
+                        }
+
+
+                        /**
+                         * Draw the a chart.js bar chart with data from the specified view that
+                         * overlays session data for the current year over session data for the
+                         * previous year, grouped by month.
+                         */
+                        function renderYearOverYearChart(ids) {
+
+                            // Adjust `now` to experiment with different days, for testing only...
+                            var now = moment(); // .subtract(3, 'day');
+
+                            var thisYear = query({
+                                'ids': ids,
+                                'dimensions': 'ga:month,ga:nthMonth',
+                                'metrics': 'ga:users',
+                                'start-date': moment(now).date(1).month(0).format('YYYY-MM-DD'),
+                                'end-date': moment(now).format('YYYY-MM-DD')
+                            });
+
+                            var lastYear = query({
+                                'ids': ids,
+                                'dimensions': 'ga:month,ga:nthMonth',
+                                'metrics': 'ga:users',
+                                'start-date': moment(now).subtract(1, 'year').date(1).month(0)
+                                    .format('YYYY-MM-DD'),
+                                'end-date': moment(now).date(1).month(0).subtract(1, 'day')
+                                    .format('YYYY-MM-DD')
+                            });
+
+                            Promise.all([thisYear, lastYear]).then(function(results) {
+                                    var data1 = results[0].rows.map(function(row) {
+                                        return +row[2];
+                                    });
+                                    var data2 = results[1].rows.map(function(row) {
+                                        return +row[2];
+                                    });
+                                    var labels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+                                        'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+                                    ];
+
+                                    // Ensure the data arrays are at least as long as the labels array.
+                                    // Chart.js bar charts don't (yet) accept sparse datasets.
+                                    for (var i = 0, len = labels.length; i < len; i++) {
+                                        if (data1[i] === undefined) data1[i] = null;
+                                        if (data2[i] === undefined) data2[i] = null;
+                                    }
+
+                                    var data = {
+                                        labels: labels,
+                                        datasets: [{
+                                                label: 'Last Year',
+                                                fillColor: 'rgba(220,220,220,0.5)',
+                                                strokeColor: 'rgba(220,220,220,1)',
+                                                data: data2
+                                            },
+                                            {
+                                                label: 'This Year',
+                                                fillColor: 'rgba(151,187,205,0.5)',
+                                                strokeColor: 'rgba(151,187,205,1)',
+                                                data: data1
+                                            }
+                                        ]
+                                    };
+
+                                    new Chart(makeCanvas('chart-2-container')).Bar(data);
+                                    generateLegend('legend-2-container', data.datasets);
+                                })
+                                .catch(function(err) {
+                                    console.error(err.stack);
+                                });
+                        }
+
+
+                        /**
+                         * Draw the a chart.js doughnut chart with data from the specified view that
+                         * show the top 5 browsers over the past seven days.
+                         */
+                        function renderTopBrowsersChart(ids) {
+
+                            query({
+                                    'ids': ids,
+                                    'dimensions': 'ga:browser',
+                                    'metrics': 'ga:pageviews',
+                                    'sort': '-ga:pageviews',
+                                    'max-results': 5
+                                })
+                                .then(function(response) {
+
+                                    var data = [];
+                                    var colors = ['#4D5360', '#949FB1', '#D4CCC5', '#E2EAE9', '#F7464A'];
+
+                                    response.rows.forEach(function(row, i) {
+                                        data.push({
+                                            value: +row[1],
+                                            color: colors[i],
+                                            label: row[0]
+                                        });
+                                    });
+
+                                    new Chart(makeCanvas('chart-3-container')).Doughnut(data);
+                                    generateLegend('legend-3-container', data);
+                                });
+                        }
+
+
+                        /**
+                         * Draw the a chart.js doughnut chart with data from the specified view that
+                         * compares sessions from mobile, desktop, and tablet over the past seven
+                         * days.
+                         */
+                        function renderTopCountriesChart(ids) {
+                            query({
+                                    'ids': ids,
+                                    'dimensions': 'ga:country',
+                                    'metrics': 'ga:sessions',
+                                    'sort': '-ga:sessions',
+                                    'max-results': 5
+                                })
+                                .then(function(response) {
+
+                                    var data = [];
+                                    var colors = ['#4D5360', '#949FB1', '#D4CCC5', '#E2EAE9', '#F7464A'];
+
+                                    response.rows.forEach(function(row, i) {
+                                        data.push({
+                                            label: row[0],
+                                            value: +row[1],
+                                            color: colors[i]
+                                        });
+                                    });
+
+                                    new Chart(makeCanvas('chart-4-container')).Doughnut(data);
+                                    generateLegend('legend-4-container', data);
+                                });
+                        }
+
+
+                        /**
+                         * Extend the Embed APIs `gapi.analytics.report.Data` component to
+                         * return a promise the is fulfilled with the value returned by the API.
+                         * @param {Object} params The request parameters.
+                         * @return {Promise} A promise.
+                         */
+                        function query(params) {
+                            return new Promise(function(resolve, reject) {
+                                var data = new gapi.analytics.report.Data({
+                                    query: params
+                                });
+                                data.once('success', function(response) {
+                                        resolve(response);
+                                    })
+                                    .once('error', function(response) {
+                                        reject(response);
+                                    })
+                                    .execute();
+                            });
+                        }
+
+
+                        /**
+                         * Create a new canvas inside the specified element. Set it to be the width
+                         * and height of its container.
+                         * @param {string} id The id attribute of the element to host the canvas.
+                         * @return {RenderingContext} The 2D canvas context.
+                         */
+                        function makeCanvas(id) {
+                            var container = document.getElementById(id);
+                            var canvas = document.createElement('canvas');
+                            var ctx = canvas.getContext('2d');
+
+                            container.innerHTML = '';
+                            canvas.width = container.offsetWidth;
+                            canvas.height = container.offsetHeight;
+                            container.appendChild(canvas);
+
+                            return ctx;
+                        }
+
+
+                        /**
+                         * Create a visual legend inside the specified element based off of a
+                         * Chart.js dataset.
+                         * @param {string} id The id attribute of the element to host the legend.
+                         * @param {Array.<Object>} items A list of labels and colors for the legend.
+                         */
+                        function generateLegend(id, items) {
+                            var legend = document.getElementById(id);
+                            legend.innerHTML = items.map(function(item) {
+                                var color = item.color || item.fillColor;
+                                var label = item.label;
+                                return '<li><i style="background:' + color + '"></i>' +
+                                    escapeHtml(label) + '</li>';
+                            }).join('');
+                        }
+
+
+                        // Set some global Chart.js defaults.
+                        Chart.defaults.global.animationSteps = 60;
+                        Chart.defaults.global.animationEasing = 'easeInOutQuart';
+                        Chart.defaults.global.responsive = true;
+                        Chart.defaults.global.maintainAspectRatio = false;
+
+
+                        /**
+                         * Escapes a potentially unsafe HTML string.
+                         * @param {string} str An string that may contain HTML entities.
+                         * @return {string} The HTML-escaped string.
+                         */
+                        function escapeHtml(str) {
+                            var div = document.createElement('div');
+                            div.appendChild(document.createTextNode(str));
+                            return div.innerHTML;
+                        }
+
+                    });
+                </script>
+            </div>
+        </div>
+
+
+
+        <!-- 	MESSAGES      -->
+        <div class="card" data-ng-controller="chatController" ng-if="usertype != 3">
+            <div class="listview lv-bordered lv-lg">
+                <div class="lv-header-alt clearfix">
+                    <a data-ui-sref="messages">
+                        <h2 class="lvh-label hidden-xs">{{discussions.length}} Conversations</h2>
+                    </a> <button class="btn btn-default" data-ui-sref="newChat">+ Nouvelle conversation</button>
+                    <ul class="lv-actions actions">
+                        <li>
+                            <button data-ui-sref="messages" class="btn btn-primary">Afficher tout</button>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="lv-body">
+                    <!--						<div class="lv-item media">
+							<a data-ui-sref="singleChat" class="lv-link-to-chat"></a>
+							<div class="checkbox pull-left">
+								<label>
+									<input type="checkbox" value="">
+									<i class="input-helper"></i>
+								</label>
+							</div>
+							<div class="media-body">
+								<div class="lv-title"> <a data-ui-sref="singleChat">Chat With</a> <a data-ui-sref="users.profilePatient">Patient Name </a><span class="badge" data-ui-sref="singleChat">2</span></div>
+								<small class="lv-small">Last message: 12/02/16, 12:59 PM</small>
+								<div class="lv-actions actions dropdown" uib-dropdown>
+									<a href="" uib-dropdown-toggle aria-expanded="true">
+										<i class="zmdi zmdi-more-vert"></i>
+									</a>
+									<ul class="dropdown-menu dropdown-menu-right">
+										<li>
+											<a href="">Remove conversation</a>
+										</li>
+									</ul>
+								</div>
+							</div>
+						</div>
+-->
+                    <div class="lv-item media fades" ng-repeat="chat in dashDiscussions | filter:search | limitTo: 4" ng-cloak>
+                        <a ng-click="getChat(chat.id)" class="lv-link-to-chat"></a>
+                        <!--<div class="checkbox pull-left">
+                                <label>
+                                    <input type="checkbox" ng-model="selectedConversations[chat._id]">
+                                    <i class="input-helper"></i>
+                                </label>
+                            </div>-->
+                        <div class="media-body">
+                            <div class="lv-title"> <a>Discuter avec</a> <a>{{chat.correspondant.firstName}} {{chat.correspondant.lastName}} <span class="badge" ng-show='chat.incoming'>{{chat.newMessages}}</span></a></div>
+                            <small class="lv-small">Derniér message: <time title="{{ chat.lastOne.date| amDateFormat: 'dddd, MMMM Do YYYY, h:mm a' }}">{{ chat.lastOne.date | amCalendar }}</time>
+</small>
+                            <div class="lv-actions actions dropdown" uib-dropdown>
+                                <a href="" uib-dropdown-toggle aria-expanded="true">
+                                        <i class="zmdi zmdi-more-vert"></i>
+                                    </a>
+                                <ul class="dropdown-menu dropdown-menu-right">
+                                    <li>
+                                        <a ng-click="deleteModal(chat._id)">Supprimer conversation</a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+
+        <!-- LATEST  RDV DEMANDS-->
+        <div class="card" data-ng-controller='rdvDemandsController'>
+            <div class="listview lv-bordered lv-lg">
+
+                <div class="lv-header-alt clearfix">
+                    <h2 class="lvh-label hidden-xs">{{articles.length}} Demandes de Rendez-vous</h2>
+                    <ul class="lv-actions actions">
+                        <li><button data-ui-sref="rdv-demands" class="btn btn-primary btn-vawe">Afficher tout</button></li>
+                        <!--<li><button data-ui-sref="new-article" class="btn btn-primary btn-vawe">Ajouter un article</button></li>-->
+                    </ul>
+                </div>
+
+                <div class="lv-body">
+                    <div class="lv-item media fades" ng-repeat="rdvDemand in rdvDemands | limitTo: 4 | orderBy: 'created_at' ">
+                        <!--                <div class="checkbox pull-left">-->
+                        <!--                    <label>-->
+                        <!--	<input type="checkbox" value="">-->
+                        <!--	<i class="input-helper"></i>-->
+                        <!--</label>-->
+                        <!--                </div>-->
+                        <div class="media-body">
+                            <div class="lv-title">{{rdvDemand.user.firstName}} {{rdvDemand.user.lastName}}
+                                <div ng-show="rdvDemand.etat == 1">
+                                    <span class="fa fa-hourglass-end " style="color:orange;"></span>
+                                    <span class="glyphicon glyphicon-ok icons-disabled" style="color:green;"></span>
+                                    <span class="glyphicon glyphicon-remove icons-disabled" style="color:red;"></span>
+                                </div>
+                                <div ng-show="rdvDemand.etat == 2">
+                                    <span class="fa fa-hourglass-end icons-disabled" style="color:orange;"></span>
+                                    <span class="glyphicon glyphicon-ok" style="color:green;"></span>
+                                    <span class="glyphicon glyphicon-remove icons-disabled" style="color:red;"></span>
+                                </div>
+                                <div ng-show="rdvDemand.etat == 3">
+                                    <span class="fa fa-hourglass-end icons-disabled" style="color:orange;"></span>
+                                    <span class="glyphicon glyphicon-ok icons-disabled" style="color:green;"></span>
+                                    <span class="glyphicon glyphicon-remove" style="color:red;"></span>
+                                </div>
+                            </div>
+                            <time title="{{ rdvDemand.date| amDateFormat:'dddd, MMMM Do YYYY, h:mm a' }}">Rendez-vous pour le: {{ rdvDemand.date |  amDateFormat:'dddd, MMMM Do YYYY, h:mm a'  }}</time>
+                            <ul class="lv-actions actions">
+                                <!-- <li>-->
+                                <!--     <a href="" ng-click="deleteModal(rdvDemand._id)">-->
+                                <!--    <i class="zmdi zmdi-delete"></i>-->
+                                <!--</a>-->
+                                <!-- </li>-->
+                                <!-- <li>-->
+                                <!--     <a href="" ng-click="updateRdvDemand(rdvDemand._id)">-->
+                                <!--    <i class="zmdi zmdi-edit zmdi-hc-fw"></i>-->
+                                <!--</a>-->
+                                <!-- </li>-->
+                            </ul>
+                        </div>
+                    </div>
+
+
+                </div>
+            </div>
+        </div>
+
+        <!-- LATEST ARTICLES -->
+        <div class="card" data-ng-controller='newsController'>
+            <div class="listview lv-bordered lv-lg">
+
+                <div class="lv-header-alt clearfix">
+                    <h2 class="lvh-label hidden-xs">{{articles.length}} Articles</h2>
+                    <ul class="lv-actions actions">
+                        <li><button data-ui-sref="news.article" class="btn btn-primary btn-vawe">Afficher tout</button></li>
+                        <li><button data-ui-sref="new-article" class="btn btn-primary btn-vawe">Ajouter un article</button></li>
+                    </ul>
+                </div>
+
+                <div class="lv-body">
+                    <div class="lv-item media fades" ng-repeat="article in articles | limitTo: 4 | orderBy: '-created_at' " ng-click="updateArticle(article._id)">
+                        <!--                <div class="checkbox pull-left">-->
+                        <!--                    <label>-->
+                        <!--	<input type="checkbox" value="">-->
+                        <!--	<i class="input-helper"></i>-->
+                        <!--</label>-->
+                        <!--                </div>-->
+                        <div class="media-body">
+                            <div class="lv-title">{{article.title}}</div>
+                            <time title="{{ article.created_at| amDateFormat: 'dddd, MMMM Do YYYY, h:mm a' }}">{{ article.created_at | amCalendar }}</time>
+                            <ul class="lv-actions actions">
+                                <!--                      <li>-->
+                                <!--                          <a ng-click="deleteArticle(article._id)">-->
+                                <!--	<i class="zmdi zmdi-delete" ></i>-->
+                                <!--</a>-->
+                                <!--                      </li>-->
+                                <!--                      <li>-->
+                                <!--                          <a ng-click="updateArticle(article._id)">-->
+                                <!--	<i class="zmdi zmdi-edit zmdi-hc-fw"  ></i>-->
+                                <!--</a>-->
+                                <!--                      </li>-->
+                            </ul>
+                        </div>
+                    </div>
+
+
+                </div>
+            </div>
+        </div>
+
+
+        <!-- USERS -->
+        <div class="card" data-ng-controller="usersController">
+            <div class="listview lv-bordered lv-lg">
+                <div class="lv-header-alt clearfix">
+                    <h2 class="lvh-label hidden-xs" ng-if="usertype == 1">Nouveaux utilisateurs</h2>
+                    <h2 class="lvh-label hidden-xs" ng-if="usertype == 2">Nouveaux patients</h2>
+                    <ul class="lv-actions actions">
+                        <li>
+                            <button ng-if="usertype == 1" data-ui-sref="users" class="btn btn-primary btn-vawe">Afficher Tout</button>
+                            <button ng-if="usertype == 2" data-ui-sref="patients" class="btn btn-primary btn-vawe">Afficher Tout</button>
+
+                        </li>
+                        <li>
+                            <button ng-if="usertype == 1" data-ui-sref="new-user" class="btn btn-primary btn-vawe">Ajouter utilisateur</buttin>
+							<button ng-if="usertype == 2" data-ui-sref="new-patient" class="btn btn-primary btn-vawe">Ajouter patient</buttin>
+							</li>
+							<li>
+							<button ng-if="usertype == 3" data-ui-sref="patients" class="btn btn-primary btn-vawe">Afficher Patients</buttin>
+							<button ng-if="usertype == 3" data-ui-sref="doctors" class="btn btn-primary btn-vawe">Afficher docteurs</buttin>
+							</li>
+						</ul>
+					</div>
+
+					<div class="lv-body">
+						<div ng-if="usertype == 1"  class="lv-item media fades" ng-repeat="user in users | filter:search | orderBy: '-created_at' | limitTo: 5">
+							<a ng-click="userProfile(user.user_id)" class="lv-link-to-chat"></a>
+							<!--<div class="checkbox pull-left">-->
+							<!--	<label>-->
+							<!--		<input type="checkbox" value="">-->
+							<!--		<i class="input-helper"></i>-->
+							<!--	</label>-->
+							<!--</div>-->
+							<div class="pull-left" ng-click="userProfile(user.user_id)">
+								<img class="lv-img-sm" ng-src="{{user.profile_picture}}" alt="">
+							</div>
+							<div class="media-body" title="{{ user.created_at| amDateFormat: 'dddd, MMMM Do YYYY, h:mm a' }}">
+								<div class="lv-title" ng-click="userProfile(user.user_id)">{{user.firstName}} {{user.lastName}}</div>
+								<small class="lv-small">
+								<a href="phone:+123456789"><i class="zmdi zmdi-phone zmdi-hc-fw"></i> {{user.phoneNumber}}</a>
+								<a href="mailto:mail@mail.com"><i class="zmdi zmdi-email zmdi-hc-fw"></i> {{user.email}}</a>
+								</small>
+								<div class="lv-actions actions article-actions" >
+									<button class="btn btn-default" ng-click="newChat(user.user_id)"><i class="zmdi zmdi-comments zmdi-hc-fw"></i><span>Commencer une discussion</span></button>
+                </div>
+            </div>
+        </div>
+        <div ng-if="usertype == 3" class="lv-item media fades" ng-repeat="user in users2 | filter:search | orderBy: '-created_at' | limitTo: 5">
+            <a ng-click="userProfile(user.user_id)" class="lv-link-to-chat"></a>
+            <!--    <div class="checkbox pull-left">-->
+            <!--        <label>-->
+            <!--	<input type="checkbox" value="">-->
+            <!--	<i class="input-helper"></i>-->
+            <!--</label>-->
+            <!--    </div>-->
+            <div class="pull-left" ng-click="userProfile(user.user_id)">
+                <img class="lv-img-sm" ng-src="{{user.profile_picture}}" alt="">
+            </div>
+            <div class="media-body" title="{{ user.created_at| amDateFormat: 'dddd, MMMM Do YYYY, h:mm a' }}">
+                <div class="lv-title" ng-click="userProfile(user.user_id)">{{user.firstName}} {{user.lastName}}</div>
+                <small class="lv-small">
+								<a href="phone:+123456789"><i class="zmdi zmdi-phone zmdi-hc-fw"></i> {{user.phoneNumber}}</a>
+								<a href="mailto:mail@mail.com"><i class="zmdi zmdi-email zmdi-hc-fw"></i> {{user.email}}</a>
+								</small>
+                <div class="lv-actions actions article-actions">
+                    <button class="btn btn-default" ng-click="newChat(user.user_id)"><i class="zmdi zmdi-comments zmdi-hc-fw"></i><span>Commencer une discussion</span></button>
+                </div>
+            </div>
+        </div>
+        <div ng-if="usertype == 2" class="lv-item media fades" ng-repeat="user in patients | filter:search | orderBy: '-created_at' | limitTo: 5">
+            <a ng-click="userProfile(user.user_id)" class="lv-link-to-chat"></a>
+        <!--    <div class="checkbox pull-left">-->
+        <!--        <label>-->
+								<!--	<input type="checkbox" value="">-->
+								<!--	<i class="input-helper"></i>-->
+								<!--</label>-->
+        <!--    </div>-->
+            <div class="pull-left" ng-click="userProfile(user.user_id)">
+                <img class="lv-img-sm" ng-src="{{user.profile_picture}}" alt="">
+            </div>
+            <div class="media-body" title="{{ user.created_at| amDateFormat: 'dddd, MMMM Do YYYY, h:mm a' }}">
+                <div class="lv-title" ng-click="userProfile(user.user_id)">{{user.firstName}} {{user.lastName}}</div>
+                <small class="lv-small">
+								<a href="phone:+123456789"><i class="zmdi zmdi-phone zmdi-hc-fw"></i> {{user.phoneNumber}}</a>
+								<a href="mailto:mail@mail.com"><i class="zmdi zmdi-email zmdi-hc-fw"></i> {{user.email}}</a>
+								</small>
+                <div class="lv-actions actions article-actions">
+                    <button class="btn btn-default" ng-click="newChat(user.user_id)"><i class="zmdi zmdi-comments zmdi-hc-fw"></i><span>Commencer une discussion</span></button>
+                </div>
+            </div>
+        </div>
+        </div>
+        </div>
+        </div>
+        </div>
+    </section>
+</section>
+<footer id="footer" data-ng-include="'template/footer.ejs'"></footer>

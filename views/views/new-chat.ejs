@@ -1,0 +1,68 @@
+<header id="header" data-current-skin={{mactrl.currentSkin}} data-ng-include="'template/header.ejs'" data-ng-controller="headerCtrl as hctrl"></header>
+<section id="main">
+<aside id="sidebar" data-ng-include="'template/sidebar-left.ejs'" data-ng-class="{ 'toggled': mactrl.sidebarToggle.left === true }"></aside>
+    <section id="content" data-ng-controller="chatNewController">
+        <div class="container">
+            <div class="card">
+                <div class="listview lv-bordered lv-lg">
+                    
+                <div class="lv-header-alt clearfix">
+                        <h2 class="lvh-label hidden-xs"> Choose user to start chat</h2>
+                         <div class="lvh-search" ng-hide="!mactrl.listviewSearchStat">
+                                <input type="text" placeholder="Start typing..." class="lvhs-input" ng-model="search">
+                                <i class="lvh-search-close" ng-click="mactrl.listviewSearchStat = false; search ='' ">&times;</i>
+                         </div>
+                        <ul class="lv-actions actions">
+                            <li>
+                                <a href="" data-ng-click="mactrl.listviewSearchStat = true">
+                                    <i class="zmdi zmdi-search"></i>
+                                </a>
+                            </li>
+                            <li>
+                                <ul class="lv-actions actions">
+                            <li>
+                                <button class="btn btn-primary btn-vawe" data-ui-sref="messages">Annuler</button>
+                            </li>
+                        </ul>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="lv-body lv-user" ng-hide='hideSpinner' >
+                        <div class="lv-item media" >
+                             <div class="pull-left" >
+                            </div>
+                            <div class="media-body" us-spinner spinner-key="spinner-1" spinner-start-active="true" spinner-theme="bigBlue">
+                                <div class="lv-title"></div>
+                               
+                            </div>
+                        </div>
+                    </div>
+                    <div class="lv-body lv-user" ng-show="errorMSGUser == true" >
+                        <div class="lv-item media">
+                            <div class="alert alert-danger fade in" >{{errorMSG}}</div>
+                        </div>
+                    </div>
+                    <div class="lv-body lv-user" dir-paginate="user in users | itemsPerPage: 5 | filter:search " ng-cloak>
+                        <div class="lv-item media" ng-click="newChat(user.user_id)">
+                            <div class="pull-left" >
+                                <img class="lv-img-sm" ng-src="{{user.profile_picture}}" alt="">
+                            </div>
+                            <div class="media-body">
+                                <div class="lv-title">{{user.firstName}} {{user.lastName}}</div>
+                                <a ng-click="newChat(user.user_id)" class="pull-right">
+                                    Start Chat
+                                </a>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+                
+               <div class="lv-pagination" >
+      <dir-pagination-controls></dir-pagination-controls>
+    </div>
+            </div>
+        </div>
+    </section>
+</section>
+<footer id="footer" data-ng-include="'template/footer.ejs'"></footer>

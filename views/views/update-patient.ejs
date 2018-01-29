@@ -1,0 +1,246 @@
+<header id="header" data-current-skin={{mactrl.currentSkin}} data-ng-include="'template/header.ejs'" data-ng-controller="headerCtrl as hctrl"></header>
+<section id="main">
+	<aside id="sidebar" data-ng-include="'template/sidebar-left.ejs'" data-ng-class="{ 'toggled': mactrl.sidebarToggle.left === true }"></aside>
+	<section id="content" >
+				<script>
+	        $(window).scroll(function(){
+      if ($(this).scrollTop() > 10) {
+          $('#fixed_head').addClass('fixed');
+      } else {
+          $('#fixed_head').removeClass('fixed');
+      }
+  });
+	    </script>
+<div class="card" data-ng-controller='userUpdatePatientController'>
+	<script type="text/ng-template" id="myModalContent.html">
+        <div class="modal-header">
+            <h3 class="modal-title" id="modal-title">Are you sure?</h3>
+        </div>
+        <div class="modal-body" id="modal-body">
+            Are you sure you want to proceed?
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-success" type="button" ng-click="ok()">OK</button>
+            <button class="btn btn-danger" type="button" ng-click="cancel()">Annuler</button>
+        </div>
+    </script>
+	<div class="card-header" id="fixed_head">
+		<h2 class="lvh-label hidden-xs">Edit patient profile</h2>
+		<ul class="actions article-actions pull-left m-t-5">
+			<li><button data-ui-sref="patients"  class="m-r-5 btn btn-default waves-effect">Annuler</button></li>
+			<li><button href="#/users/" class="btn btn-primary waves-effect" ng-click='updateUser(accountForm.$valid)'>Update user</button></li>
+		</ul>
+	</div>
+	<div class="card-body body-padding">
+		<div class="row">
+			<div class="col-sm-8 col-md-6 col-sm-offset-2 col-md-offset-3">
+				<form name="accountForm" novalidate  ng-class="{true:'submitted'}[submitted]">
+				
+					
+					<div class="form-group text-center" >
+						<div class="alert alert-danger fade in" ng-show="error == true">{{errorMSG}}</div>
+						<div class="lv-body" ng-hide='hideSpinner' us-spinner spinner-key="spinner-1" spinner-start-active="true" spinner-theme="bigBlue">
+			            	<div class="lv-item media" >
+			            	</div>
+			            </div>
+						<div class="fileinput fileinput-new" data-provides="fileinput">
+							<!--<div class="fileinput-preview thumbnail">-->
+							<!--<img-crop image="myImage2" result-image="myCroppedImage2" area-type="rectangle"></img-crop>-->
+									<!--<img class="ui bordered centered image"   src="/images/doctor_female.png"  />-->
+							<!--		<img   ng-src="{{myImage2}}"  />-->
+							<!--</div>-->
+							
+							<!--<div>-->
+							<!--	<span class="btn btn-info btn-file">-->
+							<!--		<span class="fileinput-new">Upload photo</span>-->
+							<!--		<span class="fileinput-exists">Change</span>-->
+							<!--		<input type="file"  id="fileInput" name="...">-->
+							<!--	</span>-->
+							<!--	<a href="#" class="btn btn-danger fileinput-exists" data-dismiss="fileinput">Remove</a>-->
+							<!--</div>--> 
+							<div class="row">
+								<img ng-show="image.src" ng-src="{{image.src}}" style=" background-size: cover; display: block;  width: 250px;"  />
+							</div>
+							</br>
+							<div class="row">
+								<span class="btn btn-info btn-file"  style="cursor:pointer">
+									<span class="fileinput-new"  >Upload photo</span>
+									<span class="fileinput-exists">Change</span>
+									<input type="file"  id="file-input" name="myImage" image-with-preview ng-model="image" accept="image/jpeg,image/png" />
+								</span>
+							</div>
+						</div>
+					</div>
+
+				<div class="form-group fg-line">
+						<label for="fName">First name</label>
+						<input type="text" class="form-control input-sm" id="fName" ng-model='user.firstName' ng-required="true">
+					</div>
+
+					<div class="form-group fg-line">
+						<label for="lName">Last name</label>
+						<input type="text" class="form-control input-sm" id="lName" ng-model='user.lastName' ng-required="true">
+					</div>
+					
+					<div class="form-group fg-line">
+								<div class="select">
+									<label>Gender</label>
+									<select class="form-control" ng-required="true" ng-model="user.gender">
+										<option value="Female">Female</option>
+										<option value="male">Male</option>
+									</select>
+								</div>
+					</div>
+
+					<div class="form-group">
+						<label>Date of birth</label>
+						<div class="row">
+							<div class="col-sm-4">
+								<div class="select">
+									<select name="_birthDay" id="_birthDay" onchange="" ng-model="_birthDay" class="form-control" ng-required="true">
+                                                                <option value="" selected="true" disabled="disabled">Jour</option>                                                                
+                                                                <option value="1">01</option>
+                                                                <option value="2">02</option>
+                                                                <option value="3">03</option>
+                                                                <option value="4">04</option>
+                                                                <option value="5">05</option>
+                                                                <option value="6">06</option>
+                                                                <option value="7">07</option>
+                                                                <option value="8">08</option>
+                                                                <option value="9">09</option>
+                                                                <option value="10">10</option>
+                                                                <option value="11">11</option>
+                                                                <option value="12">12</option>
+                                                                <option value="13">13</option>
+                                                                <option value="14">14</option>
+                                                                <option value="15">15</option>
+                                                                <option value="16">16</option>
+                                                                <option value="17">17</option>
+                                                                <option value="18">18</option>
+                                                                <option value="19">19</option>
+                                                                <option value="20">20</option>
+                                                                <option value="21">21</option>
+                                                                <option value="22">22</option>
+                                                                <option value="23">23</option>
+                                                                <option value="24">24</option>
+                                                                <option value="25">25</option>
+                                                                <option value="26">26</option>
+                                                                <option value="27">27</option>
+                                                                <option value="28">28</option>
+                                                                <option value="29">29</option>
+                                                                <option value="30">30</option>
+                                                                <option value="31">31</option>
+									</select>
+								</div>
+							</div>
+							<div class="col-sm-4">
+								<div class="select">
+									<select name="_birthMonth" id="_birthMonth" class="form-control" ng-model="_birthMonth" ng-required="true" >
+										<option ng-value="_birthMonth"><%= __('Mois')%> {{_birthMonth}}</option>
+
+                                                                <option value="0"><%= __('January')%></option>
+                                                                <option value="1"><%= __('February')%></option>
+                                                                <option value="2"><%= __('March')%></option>
+                                                                <option value="3"><%= __('April')%></option>
+                                                                <option value="4"><%= __('May')%></option>
+                                                                <option value="5"><%= __('June')%></option>
+                                                                <option value="6"><%= __('July')%></option>
+                                                                <option value="7"><%= __('August')%></option>
+                                                                <option value="8"><%= __('September')%></option>
+                                                                <option value="9"><%= __('October')%></option>
+                                                                <option value="10"><%= __('November')%></option>
+                                                                <option value="11"><%= __('December')%></option>
+									</select>
+								</div>
+							</div>
+							<div class="col-sm-4">
+								<div class="select">
+									<select id="_birthYear"  ng-required="true" class="form-control" ng-model="_birthYear" name="_birthYear">
+										<option value><%= __('Année')%></option>
+                                                                <script>
+                                                                    var myDate = new Date();
+                                                                    var year = myDate.getFullYear();
+
+                                                                    var optionsAsString = "";
+                                                                    for(var i = year; i > 1904; i--){
+                                                                        optionsAsString += "<option value='" + i + "'>" + i + "</option>";
+                                                                    }
+                                                                    $( 'select[name="_birthYear"]' ).append( optionsAsString );
+
+                                                                </script>
+									</select>
+								</div>
+							</div>
+						</div>
+					</div>
+					
+					
+					<script>
+						var locations = <%- JSON.stringify(locations) %>
+					</script>
+					
+					<div class="form-group">
+						<div class="row">
+						<div class="col-sm-6">
+								<div class="select">
+									<label>Country</label>
+									<select class="form-control" ng-options="location as location.country for location in locations track by location._id" ng-model="user.location" name="user.country" ng-required="true">
+									<option value="" disabled selected>Country</option>
+									</select>
+								</div>
+							</div>
+
+						<div class="col-sm-6">
+								<div class="select">
+									<label>City</label>
+									<select class="form-control" name="user.city" ng-model="user.city" ng-required="true">
+<!--										<option value="" disabled selected>{{user.city}}</option>
+-->		
+
+<option value="" disabled selected>City</option>
+<option  value="{{city}}" ng-repeat="city in user.location.cities">{{city}}</option>
+									</select>
+								</div>
+							</div>
+						</div>
+					
+					</div>
+
+					<div class="form-group fg-line">
+						<label for="phone">Phone number</label>
+						<input type="phone" class="form-control input-sm" id="phone" ng-model='user.phoneNumber' ng-required="true">
+					</div>
+					<div class="form-group fg-line">
+						<label for="email">Email</label>
+						<input type="email" class="form-control input-sm" id="email" ng-model='user.email' ng-required="true">
+					</div>
+
+					<!--<div class="form-group checkbox">
+						<label>
+							<input type="checkbox" value="" ng-model="checked">
+							<i class="input-helper"></i>
+							Generate password
+						</label>
+					</div>
+					
+					<div class="row">
+						<div class="col-sm-6">
+							<div class="form-group fg-line">
+								<label for="password">Password</label>
+								<input type="password" class="form-control input-sm" id="password" ng-disabled="checked" ng-model='user.password'>
+							</div>
+						</div>
+						<div class="col-sm-6">
+							<div class="form-group fg-line">
+								<label for="confPassword">Confirm password</label>
+								<input type="password" class="form-control input-sm" id="confPassword" ng-disabled="checked" ng-model='user.confPassword'>
+							</div>
+						</div>
+					</div>-->
+				</form>
+			</div>
+		</div>
+	</div>
+</div>
+	</section>
+</section>

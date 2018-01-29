@@ -1,0 +1,70 @@
+<header id="header" data-current-skin={{mactrl.currentSkin}} data-ng-include="'template/header.ejs'" data-ng-controller="headerCtrl as hctrl"></header>
+<section id="main">
+	<aside id="sidebar" data-ng-include="'template/sidebar-left.ejs'" data-ng-class="{ 'toggled': mactrl.sidebarToggle.left === true }"></aside>
+	<section id="content" >
+	    
+<div class="card" data-ng-app="materialAdmin" data-ng-controller='newsController'>
+    <script type="text/ng-template" id="myModalContent.html">
+        <div class="modal-header">
+            <h3 class="modal-title" id="modal-title">Are you sure?</h3>
+        </div>
+        <div class="modal-body" id="modal-body">
+            Are you sure you want to proceed?
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-success" type="button" ng-click="ok()">OK</button>
+            <button class="btn btn-danger" type="button" ng-click="cancel()">Annuler</button>
+        </div>
+    </script>  
+    <div class="card-header" >
+        <h2 class="lvh-label hidden-xs">Add new article</h2> 
+
+        <ul class="actions article-actions m-t-10">
+            <li>
+            	<a href="" class="red-link" data-ui-sref="news">Annuler</a>
+            </li>
+            <li>
+                <button class="btn btn-default m-r-5" ng-click="draftArticle(articleForm.$valid)">Save as draft</button>
+            </li>
+            <li>
+                <button class="btn btn-primary m-r-5" ng-click="addArticle(articleForm.$valid)">Publish</button>
+            </li>
+        </ul>
+    </div>
+
+    <div class="card-body body-padding">
+      
+       <form  name="articleForm" novalidate  ng-class="{true:'submitted'}[submitted]">
+           	<div class="alert alert-danger fade in" ng-show="error == true">{{errorMSG}}</div>
+           	    <div class="fg-line">
+       		     		<div class="fileinput fileinput-new" data-provides="fileinput">
+							<div class="row">
+								<img ng-show="image.src" ng-src="{{image.src}}" style=" background-size: cover; display: block;  width: 250px;"  />
+							</div>
+							</br>
+							<div class="row">
+								<span class="btn btn-info btn-file"  style="cursor:pointer">
+									<span class="fileinput-new"  >Télécharger photo</span>
+									<span class="fileinput-exists">Modifier</span>
+									<input type="file" id="file-input" name="myImage" image-with-preview ng-model="image" accept="image/jpeg,image/png" />
+								</span>
+							</div>
+						</div>
+				</div>
+                <div class="fg-line">
+                	<p class="c-black f-500">Titre de l'article</p>
+                    <input type="text" class="form-control" ng-model="article.title" ng-required="true">
+                </div><div class="fg-line">
+                	<p class="c-black f-500">Introduction de l'article</p>
+                    <input type="text" class="form-control" ng-model="article.introduction" ng-required="true">
+                </div>
+            <div>
+            	<p class="c-black f-500">Description de l'article</p>
+            	<text-angular ng-model="article.htmlContent" ng-required="true"></text-angular>
+            </div>
+       </form>
+      
+    </div>
+</div>
+	</section>
+</section>

@@ -1,0 +1,38 @@
+<header id="header" data-current-skin={{mactrl.currentSkin}} data-ng-include="'template/header.ejs'" data-ng-controller="headerCtrl as hctrl"></header>
+<section id="main">
+	<aside id="sidebar" data-ng-include="'template/sidebar-left.ejs'" data-ng-class="{ 'toggled': mactrl.sidebarToggle.left === true }"></aside>
+	<section id="content" >
+<div class="card"  data-ng-controller='usersController'>
+	<div class="card-header">
+		<h2 class="lvh-label hidden-xs">Sélectionner le type d'utilisateur à créer</h2>
+		<ul class="actions article-actions pull-left m-t-5">
+			<li><button class="btn btn-default" data-ui-sref="users" class="m-t-5">Annuler</button></li>
+<!--			<li><a href="#/users/{{ link }}" class="btn btn-primary">Create user</a></li>
+-->		</ul>		
+	</div>
+	<div class="card-body card-padding">
+		<div class="row">
+			<div class="col-sm-8 col-md-6 col-sm-offset-2 col-md-offset-3">
+				<form>
+					<p class="c-black f-500 m-b-20 m-t-20">Type d'utilisateur</p>
+					<div class="form-group">
+						<div class="alert alert-danger fade in" ng-show="error == true">{{errorMSG}}</div>
+                        <div class="fg-line">
+                            <div class="select">
+                                <select class="form-control" ng-model="link" ng-change="change()">
+									<option value="" selected="selected" disabled>Sélectionner un type</option>       							    
+                                    <option value="new-admin" >Administrateurs</option>
+                                    <option value="new-doctor" >Médecin</option>
+                                    <option value="new-patient">Patient</option>
+                                    <option value="new-nurse">Infirmier</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+				</form>
+			</div>
+		</div>
+	</div>
+</div>
+	</section>
+</section>

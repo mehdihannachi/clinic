@@ -1,0 +1,156 @@
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta property="og:title" content="Fertillia®" ng-if="false" />
+
+    <style>
+        h1 {
+            font-size: 1.5em;
+            font-family: "Kameron", serif;
+            color: #66c7c1;
+            text-transform: uppercase;
+            letter-spacing: 2.1px;
+            margin-bottom: 27px;
+            /* background-color: rgba(255, 255, 255, 1); */
+            padding: 5px;
+            position: relative;
+            top: 70px;
+            text-align: left;
+        }
+        
+        .confirm-wrap {
+            text-align: center;
+        }
+        
+        h2 {
+            text-transform: uppercase;
+            margin-bottom: 6px;
+            text-align: center;
+            font-size: 19px;
+            font-weight: 300;
+            color: rgba(0, 0, 0, 0.87)
+        }
+        
+        .logo {
+            background-color: #fff;
+            /* transform: skewX(-45deg); */
+            /*-ms-transform: skewX(-45deg);*/
+            /* -webkit-transform: skewX(-45deg); */
+            transform-origin: top;
+            position: absolute;
+            top: 0px;
+            padding: 11px;
+            float: left;
+            padding-right: 49px;
+            min-width: 150px;
+            width: 200px;
+            left: 0;
+            height: 70px;
+        }
+        
+        .logo a {
+            font-size: 16px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            display: inline-block;
+            text-indent: 20px;
+            /* transform: skewX(45deg); */
+            /*-ms-transform: skewX(45deg);*/
+            /* -webkit-transform: skewX(45deg); */
+            font-weight: 500;
+        }
+        
+        .pink-separateur {
+            background-color: #e74285 !important;
+            height: 5px;
+            position: relative;
+            top: 80px;
+        }
+        
+        .img-responsive {
+            width: 100%;
+            height: auto;
+        }
+        
+        .green-color {
+            color: #66c7c1 !important;
+        }
+        
+        .center-2 {
+            text-align: center;
+        }
+        
+        .center-3 {
+            margin: 0 auto;
+        }
+        
+        hr {
+            width: 50%;
+            position: inherit;
+            margin: 0 auto;
+            margin-top: 90px;
+        }
+        
+        .text-info {
+            color: #272626;
+            margin-top: 3px;
+            margin-bottom: 10px;
+            text-rendering: optimizeSpeed;
+            font-size: 18px;
+            line-height: 1.35455;
+            font-weight: 300;
+            letter-spacing: .015em;
+            text-align: left;
+            position: relative;
+            top: 70px;
+        }
+        
+        .grey-color {
+            color: #888888 !important
+        }
+        
+        .grey-color:hover {
+            color: #66c7c1 !important
+        }
+        
+        .center {
+            text-align: center;
+            top: 50px !important;
+            text-decoration: none;
+        }
+        
+        footer {
+            background-color: #333333;
+            height: 80px;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="middle">
+        <section class="container">
+            <div class="confirm-wrap ">
+                <div class="pink-separateur"></div>
+                <h1 class="center-2">Demande de Rendez-vous Fertillia</h1>
+                <table class="text-info">
+                    <tr>
+                        <td>Bonjour, Votre demande de rendez-vous a été refusé, vous trouverez ci dessous une copie de votre demande, vous pouvez faire une nouvelle demande de rendez-vous ou nous contacter pour plus de détails.</td>
+                    </tr>
+                    <tr>
+                        <td>Date: {{date}}</td>
+                    </tr>
+                    <tr>
+                        <td>Adresse E-mail: {{email}}</td>
+                    </tr>
+                    <tr>
+                        <td>Raison du rendez-vous: {{message}}</td>
+                    </tr>
+                </table>
+            </div>
+        </section>
+    </div>
+
+</body>
+
+</html>
